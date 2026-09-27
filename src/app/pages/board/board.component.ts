@@ -676,6 +676,24 @@ export class BoardComponent implements OnInit {
   claimedFolios = new Set<number>();
   claimedCodes: Record<number, string> = {};
   scratchMode = signal(false);
+
+  saveClaimedState() {
+    localStorage.setItem('sn_claimed', JSON.stringify({
+      folios: Array.from(this.claimedFolios),
+      codes: this.claimedCodes,
+    }));
+  }
+
+  loadClaimedState() {
+    try {
+      const raw = localStorage.getItem('sn_claimed');
+      if (raw) {
+        const d = JSON.parse(raw);
+        this.claimedFolios = new Set(d.folios || []);
+        this.claimedCodes = d.codes || {};
+      }
+    } catch {}
+  }
   scratchedResults = signal<{ folio: number; amount: number }[]>([]);
   allScratched = signal(false);
   claiming = signal(false);
@@ -690,6 +708,7 @@ export class BoardComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.loadClaimedState();
     this.slug = this.route.snapshot.paramMap.get('slug') || '';
     this.api.getBoard(this.slug).subscribe({
       next: (d: any) => {
@@ -734,6 +753,11 @@ export class BoardComponent implements OnInit {
   }
 
   selectCard(c: BoardCard) {
+    // Si ya es mío, ir a raspar
+    if (this.claimedFolios.has(c.folio)) {
+      this.goScratchMode();
+      return;
+    }
     if (this.data()?.drawn) {
       this.toast.info('Sorteo ya realizado', 'El ganador fue el folio ' + this.data()?.winner_folio);
       return;
@@ -744,6 +768,12 @@ export class BoardComponent implements OnInit {
     }
     if (c.status !== 'free') {
       this.toast.warning('Boleto tomado', 'El folio ' + this.pad(c.folio) + ' ya lo tiene alguien.');
+      return;
+    }
+    // Validar límite
+    const maxPp = (this.data() as any)?.max_tickets_per_person || 3;
+    if (this.claimedFolios.size >= maxPp) {
+      this.toast.warning('Límite alcanzado', 'Ya tienes ' + maxPp + ' boletos. Máximo permitido.');
       return;
     }
     // Si ya está registrado, reclamar directo
@@ -773,7 +803,6 @@ export class BoardComponent implements OnInit {
 
   exitScratchMode() {
     this.scratchMode.set(false);
-    this.ngOnInit();
   }
 
   onTicketScratched(result: { folio: number; amount: number }) {
@@ -834,13 +863,18 @@ export class BoardComponent implements OnInit {
         this.claiming.set(false);
         this.selected.set(null);
         this.toast.success('¡Boleto asignado!', 'Folio ' + this.pad(sel.folio) + ' es tuyo. Puedes reclamar más o rasparlo.');
-        // Guardar código para poder raspar después
+        // Guardar localmente SIN recargar el tablero
         this.claimedCodes[sel.folio] = res.code;
         this.claimedFolios.add(sel.folio);
         localStorage.setItem('sn_name', this.regName);
         localStorage.setItem('sn_phone', this.regPhone);
-        // Recargar tablero
-        this.ngOnInit();
+        // Actualizar el estado de la tarjeta localmente
+        const updated = this.cards().map(card =>
+          card.folio === sel.folio ? { ...card, status: 'registered' as any } : card
+        );
+        this.cards.set(updated);
+        // Persistir en localStorage
+        this.saveClaimedState();
       },
       error: (err: any) => {
         this.claiming.set(false);
