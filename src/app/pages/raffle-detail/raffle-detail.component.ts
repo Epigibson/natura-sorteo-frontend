@@ -26,9 +26,11 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
               <span class="bl-label">🔗 Enlace del tablero:</span>
               <code class="bl-url">{{ boardUrl() }}</code>
               <div class="bl-actions">
-                <button class="btn-sm btn-copy" (click)="copyBoardLink()">📋 Copiar</button>
+                <button class="btn-sm btn-copy" (click)="copyBoardLink()">📋 Copiar tablero</button>
                 <button class="btn-sm btn-wa" (click)="shareBoardWhatsApp()">📲 WhatsApp</button>
-                <a class="btn-sm btn-open" [href]="boardUrl()" target="_blank">👁 Ver</a>
+                <a class="btn-sm btn-open" [href]="boardUrl()" target="_blank">👁 Ver tablero</a>
+                <button class="btn-sm btn-copy" (click)="copyLandingLink()">📋 Landing</button>
+                <a class="btn-sm btn-open" [href]="landingUrl()" target="_blank">👁 Ver landing</a>
               </div>
             </div>
           </div>
@@ -143,6 +145,9 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
                 }
                 @if (t.status === 'delivered' || t.status === 'registered' || t.status === 'scratched') {
                   <button class="btn-sm btn-pay" (click)="pay(t)">Cobrar</button>
+                  <button class="btn-sm btn-wa" (click)="sendReminder(t)" title="Recordar pago">
+                    ⏰
+                  </button>
                   <button class="btn-sm btn-wa" (click)="sendWhatsApp(t)" title="Enviar por WhatsApp">
                     📲
                   </button>
@@ -881,6 +886,33 @@ export class RaffleDetailComponent implements OnInit {
         );
       },
     });
+  }
+
+  landingUrl(): string {
+    return location.origin + '/sorteo/' + (this.raffle()?.slug || '');
+  }
+
+  copyLandingLink() {
+    navigator.clipboard.writeText(this.landingUrl()).then(() => {
+      this.toast.success('Enlace de landing copiado', 'Ideal para presentar el sorteo');
+    });
+  }
+
+  sendReminder(t: Ticket) {
+    const r = this.raffle();
+    const nombre = t.participant?.name || '';
+    const p = nombre ? nombre.split(' ')[0] : '';
+    const msg =
+      (p ? 'Hola ' + p + '! ' : 'Hola! ') +
+      'Recordatorio: tu boleto *folio ' + t.folio + '* de la rifa *' + (r?.title || '') + '* ' +
+      'aun no esta pagado.\n\n' +
+      'Monto: *$' + t.amount + '*\n' +
+      'Para asegurar tu lugar en el sorteo, realiza tu pago.\n\n' +
+      'Cualquier duda, escribeme. Suerte!';
+    const tel = (t.participant?.phone || '').replace(/\D/g, '');
+    const waUrl = tel ? 'https://wa.me/52' + tel + '?text=' + encodeURIComponent(msg) : 'https://wa.me/?text=' + encodeURIComponent(msg);
+    window.open(waUrl, '_blank');
+    this.toast.info('Recordatorio abierto', 'Folio ' + t.folio);
   }
 
   boardUrl(): string {

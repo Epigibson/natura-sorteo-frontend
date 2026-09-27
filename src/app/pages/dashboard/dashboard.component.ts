@@ -27,6 +27,27 @@ import { Raffle } from '../../core/models';
 
       <app-change-password #pwd />
 
+      @if (!loading() && raffles().length > 0) {
+        <div class="global-stats">
+          <div class="gs">
+            <div class="gs-n">{{ raffles().length }}</div>
+            <div class="gs-t">sorteos</div>
+          </div>
+          <div class="gs">
+            <div class="gs-n">{{ totalTickets() }}</div>
+            <div class="gs-t">boletos totales</div>
+          </div>
+          <div class="gs">
+            <div class="gs-n">{{ openCount() }}</div>
+            <div class="gs-t">abiertos</div>
+          </div>
+          <div class="gs">
+            <div class="gs-n">{{ drawnCount() }}</div>
+            <div class="gs-t">sorteados</div>
+          </div>
+        </div>
+      }
+
       @if (loading()) {
         <div class="loading">Cargando sorteos…</div>
       } @else if (raffles().length === 0) {
@@ -141,6 +162,32 @@ import { Raffle } from '../../core/models';
         color: #6b7280;
         margin-bottom: 20px;
       }
+      .global-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+      .gs {
+        background: #fff;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 16px;
+        text-align: center;
+      }
+      .gs-n {
+        font-size: 26px;
+        font-weight: 900;
+        color: #1b5e20;
+      }
+      .gs-t {
+        font-size: 11px;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        font-weight: 700;
+        margin-top: 2px;
+      }
       .grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -245,6 +292,16 @@ export class DashboardComponent implements OnInit {
         if (!this.auth.isLoggedIn) this.router.navigate(['/login']);
       },
     });
+  }
+
+  totalTickets(): number {
+    return this.raffles().reduce((a, r) => a + r.ticket_count, 0);
+  }
+  openCount(): number {
+    return this.raffles().filter((r) => r.status === 'open').length;
+  }
+  drawnCount(): number {
+    return this.raffles().filter((r) => r.status === 'drawn').length;
   }
 
   statusLabel(s: string) {
