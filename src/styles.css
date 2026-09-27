@@ -8,7 +8,7 @@
 html,
 body {
   height: 100%;
-  font-family:
+  font-family: "Plus Jakarta Sans",
     -apple-system,
     BlinkMacSystemFont,
     'Segoe UI',
@@ -24,7 +24,7 @@ body {
 button,
 input,
 textarea {
-  font-family: inherit;
+  font-family: "Plus Jakarta Sans", inherit;
 }
 
 a {

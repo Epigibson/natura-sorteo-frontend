@@ -1,6 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { ToastService } from '../../core/toast.service';
@@ -9,624 +8,855 @@ import { PublicRaffle } from '../../core/models';
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule],
   template: `
-    <div class="landing">
-      <!-- HERO PREMIUM -->
-      <section class="hero">
-        <div class="hero-glow"></div>
-        <div class="hero-inner">
-          <div class="brand-badge">🎟️ SORTEO NATURA</div>
-          @if (raffle(); as r) {
-            <h1>{{ r.title }}</h1>
-            <p class="tagline">Un premio increíble, un raspadito de emoción</p>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <div class="grid-overlay"></div>
+      </div>
 
-            <div class="prize-card">
-              @if ($any(r).image_url) {
-                <img class="prize-photo" [src]="$any(r).image_url" [alt]="r.prize" />
-              } @else {
-                <div class="prize-icon">🎁</div>
-              }
-              <div class="prize-name">{{ r.prize }}</div>
-              <div class="prize-value">Valor: \${{ r.prize_value }} MXN</div>
-              @if (r.draw_date) {
-                <div class="draw-date">
-                  📅 Sorteo: <strong>{{ formatDate(r.draw_date) }}</strong>
-                </div>
-              }
-            </div>
+      <nav class="nav">
+        <div class="nav-brand">🎟️ SORTEO NATURA</div>
+      </nav>
 
-            <div class="stats-row">
-              <div class="stat">
-                <div class="stat-n">{{ r.ticket_count }}</div>
-                <div class="stat-t">boletos</div>
-              </div>
-              <div class="stat">
-                <div class="stat-n">\${{ r.price_min }}–\${{ r.price_max }}</div>
-                <div class="stat-t">precio al raspar</div>
-              </div>
-              <div class="stat">
-                <div class="stat-n">{{ r.paid_count }}</div>
-                <div class="stat-t">ya participan</div>
-              </div>
-            </div>
-
+      <div class="hero-content">
+        @if (raffle(); as r) {
+          <div class="hero-badge">
+            <span class="badge-dot"></span>
             @if (r.drawn) {
-              <!-- SORTEO REALIZADO -->
-              <div class="winner-hero">
-                <div class="winner-confetti">🎉🏆🎉</div>
-                <div class="winner-label">SORTEO REALIZADO</div>
-                <div class="winner-name-big">{{ r.winner_name || 'Ganador' }}</div>
-                <div class="winner-folio">Folio {{ r.winner_folio }}</div>
-                <div class="winner-prize">se ganó: {{ r.prize }}</div>
-              </div>
+              SORTEO REALIZADO
             } @else {
-              <!-- CUENTA REGRESIVA -->
-              @if (r.draw_date) {
-                <div class="countdown">
-                  <div class="cd-label">⏰ El sorteo es en</div>
-                  <div class="cd-grid">
-                    <div class="cd-box">
-                      <div class="cd-n">{{ cdDays() }}</div>
-                      <div class="cd-t">días</div>
-                    </div>
-                    <div class="cd-box">
-                      <div class="cd-n">{{ cdHours() }}</div>
-                      <div class="cd-t">hrs</div>
-                    </div>
-                    <div class="cd-box">
-                      <div class="cd-n">{{ cdMins() }}</div>
-                      <div class="cd-t">min</div>
-                    </div>
-                    <div class="cd-box">
-                      <div class="cd-n">{{ cdSecs() }}</div>
-                      <div class="cd-t">seg</div>
-                    </div>
-                  </div>
-                  <div class="cd-date">📅 {{ formatDate(r.draw_date) }}</div>
-                </div>
-              }
-              <button class="cta" (click)="goToBoard()">
-                Ver boletos disponibles 🎟️
-              </button>
-              <p class="fine">Elige tu boleto, raspa y descubre tu precio.</p>
+              INSCRIPCIONES ABIERTAS
             }
+          </div>
+
+          <h1 class="hero-title">
+            Gánate el
+            <span class="title-highlight">{{ r.prize }}</span>
+          </h1>
+
+          <p class="hero-sub">
+            Un raspadito, un boleto, una oportunidad de ganar.
+            <br>El precio lo descubres tú.
+          </p>
+
+          <!-- PREMIUM CARD -->
+          <div class="prize-card">
+            <div class="pc-glow"></div>
+            <div class="pc-inner">
+              @if ($any(r).image_url) {
+                <div class="pc-image-wrap">
+                  <img class="pc-image" [src]="$any(r).image_url" [alt]="r.prize" />
+                  <div class="pc-image-shine"></div>
+                </div>
+              } @else {
+                <div class="pc-icon">🎁</div>
+              }
+              <div class="pc-info">
+                <div class="pc-label">PREMIO</div>
+                <div class="pc-name">{{ r.prize }}</div>
+                <div class="pc-value">Valor: \${{ r.prize_value }} MXN</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STATS -->
+          <div class="hero-stats">
+            <div class="hs">
+              <div class="hs-icon">🎟️</div>
+              <div class="hs-n">{{ r.ticket_count }}</div>
+              <div class="hs-t">boletos</div>
+            </div>
+            <div class="hs-divider"></div>
+            <div class="hs">
+              <div class="hs-icon">💰</div>
+              <div class="hs-n">\${{ r.price_min }}–\${{ r.price_max }}</div>
+              <div class="hs-t">al raspar</div>
+            </div>
+            <div class="hs-divider"></div>
+            <div class="hs">
+              <div class="hs-icon">👥</div>
+              <div class="hs-n">{{ r.paid_count }}</div>
+              <div class="hs-t">participan</div>
+            </div>
+          </div>
+
+          <!-- CTA -->
+          @if (r.drawn) {
+            <div class="winner-hero">
+              <div class="wh-icon">🏆</div>
+              <div class="wh-label">GANADOR</div>
+              <div class="wh-name">{{ r.winner_name || 'Ganador' }}</div>
+              <div class="wh-folio">Folio {{ r.winner_folio }}</div>
+            </div>
           } @else {
-            <h1>Raspadito digital</h1>
-            <p class="tagline">Cargando sorteo…</p>
+            @if (r.draw_date) {
+              <div class="countdown">
+                <div class="cd-label">⏰ El sorteo es en</div>
+                <div class="cd-grid">
+                  <div class="cd-box">
+                    <div class="cd-n">{{ cdDaysVal() }}</div>
+                    <div class="cd-t">días</div>
+                  </div>
+                  <div class="cd-box">
+                    <div class="cd-n">{{ cdHoursVal() }}</div>
+                    <div class="cd-t">hrs</div>
+                  </div>
+                  <div class="cd-box">
+                    <div class="cd-n">{{ cdMinsVal() }}</div>
+                    <div class="cd-t">min</div>
+                  </div>
+                  <div class="cd-box">
+                    <div class="cd-n">{{ cdSecsVal() }}</div>
+                    <div class="cd-t">seg</div>
+                  </div>
+                </div>
+                <div class="cd-date">📅 {{ formatDate(r.draw_date) }}</div>
+              </div>
+            }
+            <button class="cta-main" (click)="goToBoard()">
+              <span class="cta-text">Elegir mi boleto</span>
+              <span class="cta-arrow">→</span>
+            </button>
+            <p class="cta-note">Solo 21 boletos · Precio al raspar · Todos ganan oportunidad</p>
           }
-        </div>
-      </section>
+        } @else {
+          <div class="loading-hero">
+            <div class="spinner-big"></div>
+            <p>Cargando sorteo…</p>
+          </div>
+        }
+      </div>
+    </section>
 
-      <!-- CÓMO FUNCIONA -->
-      <section class="how">
-        <h2>¿Cómo funciona?</h2>
-        <div class="steps">
-          <div class="step">
-            <div class="step-num">1</div>
-            <div class="step-icon">🔐</div>
-            <h3>Entra con tu folio</h3>
-            <p>Recibes un folio y un código personal de la organizadora.</p>
-          </div>
-          <div class="step">
-            <div class="step-num">2</div>
-            <div class="step-icon">✍️</div>
-            <h3>Regístrate</h3>
-            <p>Pon tu nombre y WhatsApp para controlar que cada folio se use una vez.</p>
-          </div>
-          <div class="step">
-            <div class="step-num">3</div>
+    <!-- HOW IT WORKS -->
+    <section class="section">
+      <div class="section-header">
+        <div class="sh-badge">¿CÓMO FUNCIONA?</div>
+        <h2 class="sh-title">Tres pasos y estás dentro</h2>
+        <p class="sh-sub">Rápido, fácil y sin complicaciones</p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">01</div>
+          <div class="step-icon-wrap">
             <div class="step-icon">👆</div>
-            <h3>Raspa y descubre</h3>
-            <p>Raspa con el dedo y descubre cuánto cuesta tu boleto: entre \${{ raffle()?.price_min || 30 }} y \${{ raffle()?.price_max || 50 }}.</p>
           </div>
-          <div class="step">
-            <div class="step-num">4</div>
-            <div class="step-icon">🍀</div>
-            <h3>Paga y participa</h3>
-            <p>Paga tu monto y entras al sorteo del premio. ¡Suerte!</p>
-          </div>
+          <h3>Elige tu boleto</h3>
+          <p>Entra al tablero y selecciona los boletos que quieras. Cada uno esconde un precio diferente.</p>
         </div>
-      </section>
 
-      
+        <div class="step-connector">
+          <div class="sc-line"></div>
+          <div class="sc-dot"></div>
+        </div>
 
-      <!-- CTA FINAL -->
-      @if (!raffle()?.drawn) {
-        <section class="cta-section">
+        <div class="step-card">
+          <div class="step-num">02</div>
+          <div class="step-icon-wrap">
+            <div class="step-icon">✨</div>
+          </div>
+          <h3>Raspa y descubre</h3>
+          <p>Desliza el dedo sobre el raspadito digital y descubre cuánto cuesta tu boleto.</p>
+        </div>
+
+        <div class="step-connector">
+          <div class="sc-line"></div>
+          <div class="sc-dot"></div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">03</div>
+          <div class="step-icon-wrap">
+            <div class="step-icon">🏆</div>
+          </div>
+          <h3>Paga y participa</h3>
+          <p>Realiza tu pago y entras al sorteo del premio. ¡Todos tienen la misma probabilidad!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="section section-dark">
+      <div class="section-header">
+        <div class="sh-badge sh-badge-gold">¿POR QUÉ PARTICIPAR?</div>
+        <h2 class="sh-title">Una forma divertida de ganar</h2>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="fc-icon">🎲</div>
+          <h4>El precio lo eliges tú</h4>
+          <p>Cada boleto tiene un precio entre \${{ raffle()?.price_min }} y \${{ raffle()?.price_max }}. Lo descubres al raspar.</p>
+        </div>
+        <div class="feature-card">
+          <div class="fc-icon">⚖️</div>
+          <h4>Misma probabilidad</h4>
+          <p>Pagues $30 o $50, todos tienen la misma oportunidad de ganar el premio.</p>
+        </div>
+        <div class="feature-card">
+          <div class="fc-icon">🔒</div>
+          <h4>100% transparente</h4>
+          <p>Sorteo en vivo y resultado registrado. Todo verificable y sin trucos.</p>
+        </div>
+        <div class="feature-card">
+          <div class="fc-icon">⚡</div>
+          <h4>Rápido y fácil</h4>
+          <p>Elige, raspa y paga en minutos. Todo desde tu celular.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA FINAL -->
+    <section class="cta-section">
+      <div class="cta-bg">
+        <div class="orb orb-4"></div>
+      </div>
+      <div class="cta-content">
+        @if (!raffle()?.drawn) {
           <h2>¿Listo para raspar tu suerte?</h2>
-          <p>Elige tu boleto y descubre cuánto pagas</p>
-          <button class="cta-big" (click)="goToBoard()">Ver boletos disponibles 🎟️</button>
-        </section>
-      }
+          <p>Los boletos son limitados. Elige el tuyo ahora.</p>
+          <button class="cta-main cta-large" (click)="goToBoard()">
+            <span class="cta-text">Ver boletos disponibles</span>
+            <span class="cta-arrow">→</span>
+          </button>
+        } @else {
+          <h2>¡Sorteo realizado!</h2>
+          <p>Gracias a todos los que participaron.</p>
+        }
+      </div>
+    </section>
 
-      <!-- FOOTER -->
-      <footer class="foot">
-        <div class="foot-brand">🎟️ Sorteo Natura</div>
-        <p>Pagues \${{ raffle()?.price_min || 30 }} o \${{ raffle()?.price_max || 50 }}, tu probabilidad de ganar es la misma 🍀</p>
-        <p>Rifa privada entre conocidos</p>
-      </footer>
-    </div>
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-brand">🎟️ SORTEO NATURA</div>
+      <p>Rifa privada entre conocidos · Todos los derechos reservados</p>
+    </footer>
   `,
-  styles: [
-    `
-      .landing {
-        min-height: 100vh;
-        background: #faf7f0;
-        overflow-x: hidden;
-      }
+  styles: [`
+    /* RESET */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-      /* HERO */
-      .hero {
-        background: linear-gradient(160deg, #071a08 0%, #0d3b12 25%, #1b5e20 50%, #2e7d32 75%, #1b5e20 100%);
-        color: #fff;
-        padding: 70px 20px 80px;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-      }
-      .hero::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background:
-          radial-gradient(ellipse at 20% 50%, rgba(201,162,39,0.15) 0%, transparent 50%),
-          radial-gradient(ellipse at 80% 20%, rgba(76,175,80,0.15) 0%, transparent 50%),
-          radial-gradient(ellipse at 50% 100%, rgba(201,162,39,0.1) 0%, transparent 40%);
-        pointer-events: none;
-      }
-      .hero::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 80px;
-        background: linear-gradient(to top, #faf7f0, transparent);
-        pointer-events: none;
-      }
-      .hero-glow {
-        position: absolute;
-        top: -30%;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 600px;
-        height: 600px;
-        background: radial-gradient(circle, rgba(201,162,39,0.25) 0%, rgba(201,162,39,0.05) 40%, transparent 70%);
-        pointer-events: none;
-        animation: pulse 4s ease-in-out infinite;
-      }
-      @keyframes pulse {
-        0%, 100% { opacity: 0.7; transform: translateX(-50%) scale(1); }
-        50% { opacity: 1; transform: translateX(-50%) scale(1.05); }
-      }
-      .brand-badge {
-        display: inline-block;
-        font-size: 11px;
-        letter-spacing: 4px;
-        text-transform: uppercase;
-        background: rgba(255,255,255,0.1);
-        border: 1px solid rgba(255,255,255,0.15);
-        padding: 6px 18px;
-        border-radius: 999px;
-        margin-bottom: 18px;
-      }
-      .prize-photo {
-        width: 140px;
-        height: 140px;
-        object-fit: cover;
-        border-radius: 18px;
-        border: 3px solid rgba(255,255,255,0.25);
-        margin-bottom: 12px;
-        box-shadow: 0 12px 40px rgba(0,0,0,0.3);
-      }
-      .draw-date {
-        margin-top: 10px;
-        padding: 8px 16px;
-        background: rgba(201,162,39,0.2);
-        border: 1px solid rgba(201,162,39,0.3);
-        border-radius: 999px;
-        display: inline-block;
-        font-size: 13px;
-        color: #ffe082;
-      }
-      .draw-date strong { color: #fff; }
-      .hero-inner {
-        max-width: 560px;
-        margin: 0 auto;
-      }
-      .brand {
-        font-size: 12px;
-        letter-spacing: 4px;
-        text-transform: uppercase;
-        opacity: 0.8;
-        margin-bottom: 14px;
-      }
-      .hero h1 {
-        font-size: 32px;
-        font-weight: 900;
-        margin: 0 0 8px;
-        line-height: 1.15;
-      }
-      .tagline {
-        font-size: 15px;
-        opacity: 0.85;
-        margin-bottom: 28px;
-      }
-      .prize-card {
-        background: rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 24px;
-        padding: 32px 24px;
-        margin-bottom: 30px;
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 16px 48px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
-      }
-      .prize-card::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: conic-gradient(from 0deg, transparent, rgba(201,162,39,0.1), transparent 30%);
-        animation: shine 6s linear infinite;
-        pointer-events: none;
-      }
-      @keyframes shine {
-        to { transform: rotate(360deg); }
-      }
-      .prize-icon {
-        font-size: 44px;
-      }
-      .prize-name {
-        font-size: 20px;
-        font-weight: 800;
-        margin: 8px 0 4px;
-      }
-      .prize-value {
-        font-size: 13px;
-        opacity: 0.8;
-      }
-      .stats-row {
-        display: flex;
-        justify-content: center;
-        gap: 14px;
-        margin-bottom: 32px;
-        flex-wrap: wrap;
-      }
-      .stat {
-        background: rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 18px;
-        padding: 18px 22px;
-        min-width: 110px;
-        transition: transform 0.2s, box-shadow 0.2s;
-      }
-      .stat:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-      }
-      .stat-n {
-        font-size: 20px;
-        font-weight: 900;
-      }
-      .stat-t {
-        font-size: 11px;
-        opacity: 0.75;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-top: 2px;
-      }
-      .cta, .cta-big {
-        display: inline-block;
-        padding: 18px 44px;
-        border: none;
-        border-radius: 999px;
-        background: linear-gradient(135deg, #c9a227 0%, #f0c94e 50%, #c9a227 100%);
-        background-size: 200% 200%;
-        color: #1b5e20;
-        font-size: 18px;
-        font-weight: 800;
-        cursor: pointer;
-        box-shadow: 0 8px 32px rgba(201, 162, 39, 0.4), inset 0 1px 0 rgba(255,255,255,0.3);
-        text-decoration: none;
-        transition: all 0.25s;
-        letter-spacing: 0.3px;
-        animation: btnShine 3s ease-in-out infinite;
-      }
-      @keyframes btnShine {
-        0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-      }
-      .cta:hover, .cta-big:hover {
-        transform: translateY(-3px) scale(1.02);
-        box-shadow: 0 14px 40px rgba(201, 162, 39, 0.5), inset 0 1px 0 rgba(255,255,255,0.3);
-      }
-      .cta-big {
-        padding: 20px 52px;
-        font-size: 19px;
-      }
-      .fine {
-        font-size: 12px;
-        opacity: 0.7;
-        margin-top: 14px;
-      }
-      .winner-hero {
-        background: linear-gradient(135deg, rgba(201,162,39,0.25), rgba(255,215,0,0.15));
-        border: 2px solid rgba(255,215,0,0.4);
-        border-radius: 24px;
-        padding: 32px 24px;
-        margin-bottom: 20px;
-        position: relative;
-        overflow: hidden;
-      }
-      .winner-hero::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(circle at 50% 0%, rgba(255,215,0,0.2) 0%, transparent 60%);
-      }
-      .winner-confetti { font-size: 32px; position: relative; }
-      .winner-label {
-        font-size: 12px; letter-spacing: 4px; text-transform: uppercase;
-        color: #ffe082; font-weight: 800; margin: 8px 0; position: relative;
-      }
-      .winner-name-big {
-        font-size: 28px; font-weight: 900; color: #fff;
-        position: relative; text-shadow: 0 2px 12px rgba(0,0,0,0.3);
-      }
-      .winner-folio {
-        font-size: 16px; color: #ffe082; font-weight: 700; margin: 4px 0; position: relative;
-      }
-      .winner-prize {
-        font-size: 14px; color: rgba(255,255,255,0.8); margin-top: 8px; position: relative;
-      }
+    /* FONT */
+    :host {
+      display: block;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: #1a1a2e;
+      overflow-x: hidden;
+    }
 
-      .countdown {
-        background: rgba(255,255,255,0.08);
-        backdrop-filter: blur(16px);
-        border: 1px solid rgba(255,255,255,0.12);
-        border-radius: 22px;
-        padding: 24px;
-        margin-bottom: 24px;
-      }
-      .cd-label {
-        font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
-        color: #ffe082; font-weight: 800; margin-bottom: 14px;
-      }
-      .cd-grid {
-        display: flex; justify-content: center; gap: 12px; margin-bottom: 14px;
-      }
-      .cd-box {
-        background: rgba(255,255,255,0.1);
-        border: 1px solid rgba(255,255,255,0.15);
-        border-radius: 16px;
-        padding: 12px 16px;
-        min-width: 64px;
-        text-align: center;
-      }
-      .cd-n {
-        font-size: 28px; font-weight: 900; color: #fff;
-        font-variant-numeric: tabular-nums;
-      }
-      .cd-t {
-        font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
-        color: rgba(255,255,255,0.6); margin-top: 2px;
-      }
-      .cd-date {
-        font-size: 13px; color: rgba(255,255,255,0.7);
-      }
+    /* ===== HERO ===== */
+    .hero {
+      min-height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
 
-      /* CÓMO FUNCIONA */
-      .how {
-        max-width: 720px;
-        margin: 0 auto;
-        padding: 48px 20px;
-      }
-      .how h2 {
-        text-align: center;
-        font-size: 24px;
-        color: #1f2937;
-        margin-bottom: 32px;
-      }
-      .steps {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 18px;
-      }
-      .step {
-        background: #fff;
-        border: 1px solid #e5e7eb;
-        border-radius: 20px;
-        padding: 28px 20px;
-        text-align: center;
-        position: relative;
-        transition: all 0.25s;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-      }
-      .step:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 32px rgba(0,0,0,0.08);
-        border-color: #c8e6c9;
-      }
-      .step-num {
-        position: absolute;
-        top: -12px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 28px;
-        height: 28px;
-        background: #1b5e20;
-        color: #fff;
-        border-radius: 50%;
-        font-size: 13px;
-        font-weight: 800;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .step-icon {
-        font-size: 32px;
-        margin: 8px 0 10px;
-      }
-      .step h3 {
-        font-size: 15px;
-        color: #1f2937;
-        margin: 0 0 6px;
-      }
-      .step p {
-        font-size: 13px;
-        color: #6b7280;
-        line-height: 1.5;
-        margin: 0;
-      }
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(165deg, #050a15 0%, #0a1628 30%, #0d2137 60%, #0a1628 100%);
+      z-index: 0;
+    }
 
-      /* ACCESO */
-      .access {
-        background: linear-gradient(155deg, #1b5e20, #2e7d32);
-        padding: 48px 20px 56px;
-        text-align: center;
-      }
-      .access h2 {
-        color: #fff;
-        font-size: 24px;
-        margin: 0 0 8px;
-      }
-      .access-sub {
-        color: rgba(255, 255, 255, 0.8);
-        font-size: 14px;
-        margin-bottom: 24px;
-      }
-      .access-card {
-        max-width: 420px;
-        margin: 0 auto;
-        background: #faf7f0;
-        border-radius: 20px;
-        padding: 28px 24px;
-        text-align: left;
-      }
-      .row2 {
-        display: grid;
-        grid-template-columns: 1fr 1.4fr;
-        gap: 12px;
-      }
-      label {
-        display: block;
-        font-size: 11px;
-        font-weight: 700;
-        color: #1b5e20;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-        margin-bottom: 5px;
-      }
-      input {
-        width: 100%;
-        padding: 13px;
-        border: 2px solid #c8e6c9;
-        border-radius: 12px;
-        font-size: 16px;
-        outline: none;
-        box-sizing: border-box;
-      }
-      input:focus {
-        border-color: #4caf50;
-      }
-      .access-card .cta {
-        display: block;
-        width: 100%;
-        margin-top: 18px;
-        text-align: center;
-        background: linear-gradient(135deg, #1b5e20, #4caf50);
-        color: #fff;
-        box-shadow: 0 6px 20px rgba(27, 94, 32, 0.3);
-      }
-      .error {
-        margin-top: 12px;
-        padding: 10px;
-        background: #ffebee;
-        color: #c62828;
-        border-radius: 9px;
-        font-size: 13px;
-        font-weight: 600;
-      }
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      animation: orbFloat 8s ease-in-out infinite;
+    }
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(201,162,39,0.25), transparent 70%);
+      top: -10%; right: -10%;
+      animation-delay: 0s;
+    }
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(27,94,32,0.3), transparent 70%);
+      bottom: 10%; left: -10%;
+      animation-delay: -3s;
+    }
+    .orb-3 {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(201,162,39,0.15), transparent 70%);
+      top: 40%; left: 30%;
+      animation-delay: -5s;
+    }
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(20px, -30px) scale(1.05); }
+      66% { transform: translate(-15px, 20px) scale(0.95); }
+    }
 
-      /* FOOTER */
-      .cta-section {
-        text-align: center;
-        padding: 60px 20px;
-        background: linear-gradient(135deg, #0d3b12, #1b5e20);
-        color: #fff;
-        position: relative;
-        overflow: hidden;
-      }
-      .cta-section::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(ellipse at 50% 0%, rgba(201,162,39,0.2) 0%, transparent 60%);
-        pointer-events: none;
-      }
-      .cta-section h2 {
-        font-size: 28px;
-        font-weight: 900;
-        margin: 0 0 8px;
-        position: relative;
-      }
-      .cta-section p {
-        opacity: 0.8;
-        margin: 0 0 28px;
-        position: relative;
-      }
-      .foot {
-        background: #071a08;
-        color: rgba(255, 255, 255, 0.5);
-        text-align: center;
-        padding: 36px 20px;
-        font-size: 12px;
-        line-height: 1.7;
-      }
-      .foot-brand {
-        font-size: 14px;
-        font-weight: 800;
-        color: rgba(255, 255, 255, 0.8);
-        margin-bottom: 8px;
-        letter-spacing: 2px;
-      }
+    .grid-overlay {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(201,162,39,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,162,39,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
 
-      @media (max-width: 480px) {
-        .hero { padding: 36px 16px 44px; }
-        .cd-grid { gap: 8px; }
-        .cd-box { min-width: 52px; padding: 10px 8px; }
-        .cd-n { font-size: 22px; }
-        .winner-name-big { font-size: 22px; }
-        .hero h1 { font-size: 22px; }
-        .tagline { font-size: 13px; }
-        .prize-card { padding: 18px 14px; }
-        .prize-name { font-size: 17px; }
-        .stats-row { gap: 8px; }
-        .stat { min-width: 0; flex: 1; padding: 10px 8px; }
-        .stat-n { font-size: 15px; }
-        .stat-t { font-size: 9px; }
-        .how { padding: 32px 16px; }
-        .how h2 { font-size: 20px; }
-        .steps { grid-template-columns: 1fr; }
-        .access { padding: 36px 16px 44px; }
-        .row2 { grid-template-columns: 1fr; }
-        .access-card { padding: 20px 16px; }
-      }
-    `,
-  ],
+    .nav {
+      position: relative;
+      z-index: 2;
+      padding: 24px 28px;
+      display: flex;
+      justify-content: center;
+    }
+    .nav-brand {
+      font-size: 13px;
+      letter-spacing: 4px;
+      color: rgba(255,255,255,0.7);
+      font-weight: 700;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 20px 60px;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(201,162,39,0.15);
+      border: 1px solid rgba(201,162,39,0.25);
+      padding: 8px 20px;
+      border-radius: 999px;
+      color: #c9a227;
+      font-size: 11px;
+      letter-spacing: 3px;
+      font-weight: 800;
+      margin-bottom: 28px;
+    }
+    .badge-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #4caf50;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .hero-title {
+      font-size: clamp(32px, 6vw, 56px);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 18px;
+      max-width: 700px;
+    }
+    .title-highlight {
+      background: linear-gradient(135deg, #c9a227, #f0c94e, #c9a227);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 3s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .hero-sub {
+      font-size: clamp(15px, 2.5vw, 18px);
+      color: rgba(255,255,255,0.6);
+      line-height: 1.6;
+      margin-bottom: 36px;
+      max-width: 500px;
+    }
+
+    /* PRIZE CARD */
+    .prize-card {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+      margin-bottom: 32px;
+    }
+    .pc-glow {
+      position: absolute;
+      inset: -2px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(201,162,39,0.5), rgba(76,175,80,0.3), rgba(201,162,39,0.5));
+      opacity: 0.6;
+      animation: glowPulse 3s ease-in-out infinite;
+    }
+    @keyframes glowPulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.8; }
+    }
+    .pc-inner {
+      position: relative;
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 22px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .pc-image-wrap {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      border-radius: 16px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .pc-image {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .pc-image-shine {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%);
+      animation: shine 3s ease-in-out infinite;
+    }
+    @keyframes shine {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    .pc-icon {
+      font-size: 56px;
+      flex-shrink: 0;
+    }
+    .pc-info { text-align: left; }
+    .pc-label {
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: rgba(201,162,39,0.8);
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .pc-name {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+    .pc-value {
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* STATS */
+    .hero-stats {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .hs {
+      text-align: center;
+    }
+    .hs-icon {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+    .hs-n {
+      font-size: 22px;
+      font-weight: 900;
+      color: #fff;
+    }
+    .hs-t {
+      font-size: 11px;
+      color: rgba(255,255,255,0.45);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 2px;
+    }
+    .hs-divider {
+      width: 1px;
+      height: 40px;
+      background: rgba(255,255,255,0.1);
+    }
+
+    /* COUNTDOWN */
+    .countdown {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 22px 28px;
+      margin-bottom: 28px;
+    }
+    .cd-label {
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: rgba(201,162,39,0.8);
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+    .cd-grid {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .cd-box {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 12px 16px;
+      min-width: 60px;
+    }
+    .cd-n {
+      font-size: 26px;
+      font-weight: 900;
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+    }
+    .cd-t {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.4);
+    }
+    .cd-date {
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* WINNER */
+    .winner-hero {
+      background: linear-gradient(135deg, rgba(201,162,39,0.2), rgba(255,215,0,0.1));
+      border: 1px solid rgba(255,215,0,0.3);
+      border-radius: 20px;
+      padding: 28px 36px;
+      margin-bottom: 24px;
+    }
+    .wh-icon { font-size: 42px; margin-bottom: 8px; }
+    .wh-label {
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: #c9a227;
+      font-weight: 800;
+    }
+    .wh-name {
+      font-size: 28px;
+      font-weight: 900;
+      color: #fff;
+      margin: 4px 0;
+    }
+    .wh-folio {
+      font-size: 15px;
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* CTA BUTTON */
+    .cta-main {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 40px;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #c9a227, #f0c94e);
+      color: #1a1a2e;
+      font-size: 17px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 8px 32px rgba(201,162,39,0.35), inset 0 1px 0 rgba(255,255,255,0.2);
+      font-family: inherit;
+    }
+    .cta-main:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 44px rgba(201,162,39,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+    }
+    .cta-arrow {
+      transition: transform 0.3s;
+    }
+    .cta-main:hover .cta-arrow {
+      transform: translateX(4px);
+    }
+    .cta-large {
+      padding: 22px 52px;
+      font-size: 19px;
+    }
+    .cta-note {
+      margin-top: 14px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.35);
+    }
+
+    /* LOADING */
+    .loading-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      color: rgba(255,255,255,0.6);
+    }
+    .spinner-big {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: #c9a227;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== SECTIONS ===== */
+    .section {
+      padding: 80px 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .section-dark {
+      background: #0a1628;
+      max-width: 100%;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 52px;
+    }
+    .sh-badge {
+      display: inline-block;
+      background: rgba(27,94,32,0.1);
+      color: #1b5e20;
+      padding: 6px 18px;
+      border-radius: 999px;
+      font-size: 11px;
+      letter-spacing: 3px;
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+    .sh-badge-gold {
+      background: rgba(201,162,39,0.15);
+      color: #c9a227;
+    }
+    .sh-title {
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 800;
+      color: #1a1a2e;
+      margin-bottom: 10px;
+    }
+    .section-dark .sh-title {
+      color: #fff;
+    }
+    .sh-sub {
+      color: #6b7280;
+      font-size: 16px;
+    }
+
+    /* STEPS */
+    .steps-grid {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      justify-content: center;
+    }
+    .step-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-align: center;
+      flex: 1;
+      max-width: 280px;
+      position: relative;
+      transition: all 0.3s;
+    }
+    .step-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.08);
+      border-color: #c8e6c9;
+    }
+    .step-num {
+      font-size: 48px;
+      font-weight: 900;
+      color: #f0f0f0;
+      line-height: 1;
+      margin-bottom: -10px;
+    }
+    .step-icon-wrap {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 16px auto;
+    }
+    .step-icon {
+      font-size: 28px;
+    }
+    .step-card h3 {
+      font-size: 17px;
+      font-weight: 800;
+      color: #1a1a2e;
+      margin-bottom: 8px;
+    }
+    .step-card p {
+      font-size: 13.5px;
+      color: #6b7280;
+      line-height: 1.55;
+    }
+    .step-connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0 8px;
+    }
+    .sc-line {
+      width: 32px;
+      height: 2px;
+      background: linear-gradient(90deg, #c8e6c9, #c9a227);
+      border-radius: 2px;
+    }
+    .sc-dot {
+      width: 8px;
+      height: 8px;
+      background: #c9a227;
+      border-radius: 50%;
+      margin-top: 4px;
+    }
+
+    /* FEATURES */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .feature-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 18px;
+      padding: 28px 22px;
+      transition: all 0.3s;
+    }
+    .feature-card:hover {
+      background: rgba(255,255,255,0.07);
+      border-color: rgba(201,162,39,0.2);
+      transform: translateY(-4px);
+    }
+    .fc-icon {
+      font-size: 32px;
+      margin-bottom: 14px;
+    }
+    .feature-card h4 {
+      color: #fff;
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .feature-card p {
+      color: rgba(255,255,255,0.5);
+      font-size: 13.5px;
+      line-height: 1.55;
+    }
+
+    /* CTA SECTION */
+    .cta-section {
+      position: relative;
+      padding: 80px 24px;
+      overflow: hidden;
+    }
+    .cta-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(165deg, #050a15, #0d2137);
+    }
+    .orb-4 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(201,162,39,0.2), transparent 70%);
+      top: -20%; right: 10%;
+    }
+    .cta-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+    .cta-content h2 {
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    .cta-content p {
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 28px;
+      font-size: 16px;
+    }
+
+    /* FOOTER */
+    .footer {
+      background: #050a15;
+      text-align: center;
+      padding: 32px 24px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .footer-brand {
+      font-size: 13px;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.6);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .footer p {
+      font-size: 12px;
+      color: rgba(255,255,255,0.25);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .hero-content { padding: 16px 16px 48px; }
+      .pc-inner { flex-direction: column; text-align: center; }
+      .pc-info { text-align: center; }
+      .pc-image-wrap { width: 120px; height: 120px; }
+      .hero-stats { gap: 14px; }
+      .hs-divider { display: none; }
+      .cd-grid { gap: 8px; }
+      .cd-box { min-width: 52px; padding: 10px 8px; }
+      .cd-n { font-size: 20px; }
+      .steps-grid { flex-direction: column; align-items: center; }
+      .step-connector { transform: rotate(90deg); padding: 8px 0; }
+      .step-card { max-width: 100%; width: 100%; }
+      .section { padding: 56px 16px; }
+    }
+  `]
 })
 export class LandingComponent implements OnInit {
   raffle = signal<PublicRaffle | null>(null);
-  folio = 1;
-  code = '';
-  error = signal('');
   slug = '';
+
+  cdDaysVal = signal('--');
+  cdHoursVal = signal('--');
+  cdMinsVal = signal('--');
+  cdSecsVal = signal('--');
+  private cdInterval: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -645,36 +875,18 @@ export class LandingComponent implements OnInit {
         }
       },
       error: () => {
-        this.error.set('Sorteo no encontrado');
-        this.toast.error('Sorteo no encontrado', 'Verifica el enlace con la organizadora');
+        this.toast.error('Sorteo no encontrado', 'Verifica el enlace');
       },
     });
   }
 
-  scrollToAccess() {
-    document.getElementById('access')?.scrollIntoView({ behavior: 'smooth' });
-  }
-
-  private cdInterval: any;
-  private cdTarget = 0;
-  cdDaysVal = signal('--');
-  cdHoursVal = signal('--');
-  cdMinsVal = signal('--');
-  cdSecsVal = signal('--');
-
-  cdDays() { return this.cdDaysVal(); }
-  cdHours() { return this.cdHoursVal(); }
-  cdMins() { return this.cdMinsVal(); }
-  cdSecs() { return this.cdSecsVal(); }
-
   private startCountdown(dateStr: string) {
     if (!dateStr) return;
     const parts = dateStr.split('-');
-    this.cdTarget = new Date(+parts[0], +parts[1]-1, +parts[2], 12, 0, 0).getTime();
+    const target = new Date(+parts[0], +parts[1]-1, +parts[2], 12, 0, 0).getTime();
     if (this.cdInterval) clearInterval(this.cdInterval);
     const tick = () => {
-      const now = Date.now();
-      const diff = this.cdTarget - now;
+      const diff = target - Date.now();
       if (diff <= 0) {
         this.cdDaysVal.set('00');
         this.cdHoursVal.set('00');
@@ -700,27 +912,18 @@ export class LandingComponent implements OnInit {
     if (!d) return '';
     try {
       const dt = new Date(d + 'T12:00:00');
-      return dt.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-    } catch { return d; }
+      return dt.toLocaleDateString('es-MX', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      });
+    } catch {
+      return d;
+    }
   }
 
   goToBoard() {
     this.router.navigate(['/sorteo', this.slug, 'tablero']);
-  }
-
-  goToPlay() {
-    const f = +this.folio;
-    if (!f || f < 1) {
-      this.error.set('Escribe tu número de folio');
-      return;
-    }
-    if (!this.code || this.code.trim().length < 3) {
-      this.error.set('Escribe tu código de acceso');
-      return;
-    }
-    this.error.set('');
-    this.router.navigate(['/jugar', this.slug], {
-      queryParams: { folio: f, cod: this.code.trim().toUpperCase() },
-    });
   }
 }
