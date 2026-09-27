@@ -33,6 +33,7 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
                 <a class="btn-sm btn-open" [href]="landingUrl()" target="_blank">👁 Ver landing</a>
                 <button class="btn-sm btn-copy" (click)="editRaffle()">✏️ Editar</button>
                 <button class="btn-sm btn-open" (click)="exportBackup()">💾 Backup</button>
+                <button class="btn-sm btn-open" (click)="showQR()">📱 QR</button>
               </div>
             </div>
           </div>
@@ -48,15 +49,15 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
           </div>
         </header>
 
-        @if (r.status === 'drawn' && r.winner; as w) {
+        @if (r.status === 'drawn' && r.winner; as winner) {
           <div class="winner-banner">
             <div class="trophy">🏆</div>
             <div>
               <div class="w-title">¡Tenemos ganador!</div>
               <div class="w-name">
-                Folio {{ w.folio }} — {{ w.participant?.name || 'Ganador' }}
+                Folio {{ winner.folio }} — {{ winner.participant?.name || 'Ganador' }}
               </div>
-              <div class="w-amount">Boleto de \${{ w.amount }}</div>
+              <div class="w-amount">Boleto de \${{ winner.amount }}</div>
             </div>
           </div>
         }
@@ -170,6 +171,45 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
             </div>
           }
         </div>
+
+        <!-- Modal QR -->
+        @if (qrOpen()) {
+          <div class="overlay" (click)="qrOpen.set(false)">
+            <div class="draw-modal" (click)="$event.stopPropagation()">
+              <h3 style="margin:0 0 16px; color:#1f2937;">📱 QR del tablero</h3>
+              <img [src]="getQRUrl()" alt="QR" style="width:220px; height:220px; border-radius:16px; border:2px solid #e5e7eb;" />
+              <p style="color:#6b7280; font-size:13px; margin:14px 0 20px;">
+                Escanea para ir al tablero de boletos
+              </p>
+              <button class="btn-save" (click)="qrOpen.set(false)">Cerrar</button>
+            </div>
+          </div>
+        }
+
+        <!-- Modal SORTEO animado -->
+        @if (drawOpen()) {
+          <div class="overlay draw-overlay">
+            <div class="draw-modal" (click)="$event.stopPropagation()">
+              @if (drawSpinning()) {
+                <div class="draw-spinner">
+                  <div class="spinner-emoji">🎰</div>
+                  <h2>Sorteando…</h2>
+                  <div class="spinner-bar"><div class="spinner-fill"></div></div>
+                  <p>La suerte está echada</p>
+                </div>
+              } @else if (drawResult()) {
+                <div class="draw-winner">
+                  <div class="dw-celebration">🎉🏆🎉</div>
+                  <div class="dw-label">¡TENEMOS GANADOR!</div>
+                  <div class="dw-name">{{ drawResult().participant?.name || 'Ganador' }}</div>
+                  <div class="dw-folio">Folio {{ drawResult().folio }}</div>
+                  <div class="dw-amount">Boleto de \${{ drawResult().amount }}</div>
+                  <button class="btn-save" (click)="drawOpen.set(false)">Cerrar</button>
+                </div>
+              }
+            </div>
+          </div>
+        }
 
         <!-- Modal editar sorteo PREMIUM -->
         @if (editOpen()) {
@@ -653,6 +693,42 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
         padding: 80px;
         color: #6b7280;
       }
+      .draw-overlay { background: rgba(10,20,10,0.85); }
+      .draw-modal {
+        background: #fff; border-radius: 24px; padding: 40px 32px; width: 100%; max-width: 420px;
+        text-align: center; animation: editPop 0.25s cubic-bezier(0.21,1.02,0.73,1);
+      }
+      .draw-spinner .spinner-emoji {
+        font-size: 64px; animation: slotSpin 0.5s ease-in-out infinite;
+      }
+      @keyframes slotSpin {
+        0%, 100% { transform: scale(1) rotate(0deg); }
+        25% { transform: scale(1.1) rotate(-5deg); }
+        75% { transform: scale(1.1) rotate(5deg); }
+      }
+      .draw-spinner h2 { margin: 16px 0; font-size: 24px; color: #1f2937; }
+      .spinner-bar {
+        height: 8px; background: #e5e7eb; border-radius: 999px; overflow: hidden; margin: 16px 0;
+      }
+      .spinner-fill {
+        height: 100%; background: linear-gradient(90deg, #4caf50, #c9a227);
+        border-radius: 999px; animation: fillBar 3s linear forwards;
+      }
+      @keyframes fillBar { from { width: 0%; } to { width: 100%; } }
+      .draw-spinner p { color: #6b7280; }
+      .draw-winner .dw-celebration { font-size: 42px; margin-bottom: 12px; }
+      .dw-label {
+        font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+        color: #c9a227; font-weight: 800; margin-bottom: 8px;
+      }
+      .dw-name {
+        font-size: 28px; font-weight: 900; color: #1b5e20; margin-bottom: 4px;
+      }
+      .dw-folio { font-size: 16px; color: #6b7280; font-weight: 700; margin-bottom: 8px; }
+      .dw-amount {
+        font-size: 18px; color: #c9a227; font-weight: 800;
+        margin-bottom: 24px; padding: 10px; background: #fff8e1; border-radius: 12px;
+      }
       .overlay {
         position: fixed; inset: 0; background: rgba(10,20,10,0.6); backdrop-filter: blur(6px);
         display: flex; align-items: center; justify-content: center; z-index: 9000; padding: 18px;
@@ -804,6 +880,9 @@ export class RaffleDetailComponent implements OnInit {
   assignPhone = '';
   modalError = signal('');
   exporting = signal(false);
+  drawOpen = signal(false);
+  drawResult = signal<any>(null);
+  drawSpinning = signal(false);
 
   private raffleId = '';
 
@@ -1017,17 +1096,42 @@ export class RaffleDetailComponent implements OnInit {
       variant: 'primary',
     });
     if (!ok) return;
-    this.api.draw(this.raffleId).subscribe({
-      next: (res) => {
-        this.toast.success(
-          '🏆 ¡Tenemos ganador!',
-          `Folio ${res.winner.folio} — ${res.winner.participant?.name || 'Ganador'} · Boleto de $${res.winner.amount}`,
-        );
-        this.reload();
-      },
-      error: (err) =>
-        this.toast.error('Error al sortear', err?.error?.detail || 'Intenta de nuevo'),
-    });
+    this.drawOpen.set(true);
+    this.drawResult.set(null);
+    this.drawSpinning.set(true);
+
+    setTimeout(() => {
+      this.api.draw(this.raffleId).subscribe({
+        next: (res) => {
+          this.drawSpinning.set(false);
+          this.drawResult.set(res.winner);
+          this.lanzarConfettiSorteo();
+          this.toast.success('🏆 ¡Tenemos ganador!', `Folio ${res.winner.folio} — ${res.winner.participant?.name || 'Ganador'}`);
+          this.reload();
+        },
+        error: (err) => {
+          this.drawSpinning.set(false);
+          this.drawOpen.set(false);
+          this.toast.error('Error al sortear', err?.error?.detail || 'Intenta de nuevo');
+        },
+      });
+    }, 3000);
+  }
+
+  lanzarConfettiSorteo() {
+    for (let i = 0; i < 50; i++) {
+      const el = document.createElement('div');
+      const colors = ['#c9a227','#4caf50','#1b5e20','#ff7043','#fff176','#fff'];
+      el.style.cssText = `position:fixed;width:${6+Math.random()*10}px;height:${6+Math.random()*10}px;top:-14px;left:${Math.random()*100}vw;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>0.5?'50%':'2px'};z-index:99999;pointer-events:none;animation:sc-fall ${2+Math.random()*1.5}s linear ${Math.random()*0.8}s forwards;`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4500);
+    }
+    if (!document.getElementById('sc-keyframes')) {
+      const st = document.createElement('style');
+      st.id = 'sc-keyframes';
+      st.textContent = '@keyframes sc-fall { 0% { opacity:1; transform:translateY(0) rotate(0deg); } 100% { opacity:0; transform:translateY(105vh) rotate(720deg); } }';
+      document.head.appendChild(st);
+    }
   }
 
   exportExcel() {
@@ -1165,6 +1269,16 @@ export class RaffleDetailComponent implements OnInit {
     const waUrl = tel ? 'https://wa.me/52' + tel + '?text=' + encodeURIComponent(msg) : 'https://wa.me/?text=' + encodeURIComponent(msg);
     window.open(waUrl, '_blank');
     this.toast.info('Recordatorio abierto', 'Folio ' + t.folio);
+  }
+
+  qrOpen = signal(false);
+
+  showQR() {
+    this.qrOpen.set(true);
+  }
+
+  getQRUrl(): string {
+    return 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(this.boardUrl());
   }
 
   boardUrl(): string {
