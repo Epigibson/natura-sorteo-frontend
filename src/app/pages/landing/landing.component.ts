@@ -947,10 +947,10 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
 
     /* CTA SECTION */
     .stats-bar {
-      background: linear-gradient(135deg, rgba(201,162,39,0.08), rgba(76,175,80,0.05));
-      border-top: 1px solid rgba(201,162,39,0.1);
-      border-bottom: 1px solid rgba(201,162,39,0.1);
-      padding: 36px 24px;
+      background: #070e1a;
+      border-top: 1px solid rgba(201,162,39,0.12);
+      border-bottom: 1px solid rgba(201,162,39,0.12);
+      padding: 40px 24px;
     }
     .sb-inner {
       max-width: 900px;
@@ -968,11 +968,11 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     .sb-n {
       font-size: 28px;
       font-weight: 900;
-      color: #c9a227;
+      color: #f0c94e;
     }
     .sb-t {
       font-size: 11px;
-      color: rgba(255,255,255,0.55);
+      color: rgba(255,255,255,0.65);
       text-transform: uppercase;
       letter-spacing: 1px;
       margin-top: 4px;
@@ -980,7 +980,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     .sb-divider {
       width: 1px;
       height: 36px;
-      background: rgba(255,255,255,0.08);
+      background: rgba(201,162,39,0.2);
     }
     .cta-guarantee {
       display: flex;

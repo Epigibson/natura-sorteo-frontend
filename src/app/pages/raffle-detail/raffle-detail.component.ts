@@ -266,7 +266,7 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
                       <span class="upload-text">Toca para subir una foto</span>
                       <span class="upload-hint">JPG, PNG o WebP · máx 2 MB</span>
                     }
-                    <input type="file" accept="image/*" (change)="onPhotoChange($event)" hidden />
+                    <input type="file" accept="image/*" (change)="onPhotoChange($event)" />
                   </label>
                 </div>
               </div>
@@ -745,12 +745,24 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
         to { opacity: 1; transform: scale(1) translateY(0); }
       }
       .edit-header {
-        background: linear-gradient(135deg, #1b5e20, #2e7d32);
-        color: #fff; padding: 24px 28px 20px; text-align: center;
+        background: linear-gradient(135deg, #0d3b12, #1b5e20, #2e7d32);
+        color: #fff; padding: 28px 28px 24px; text-align: center;
+        position: relative; overflow: hidden;
       }
-      .edit-icon { font-size: 32px; margin-bottom: 6px; }
-      .edit-header h3 { margin: 0; font-size: 20px; font-weight: 800; }
-      .edit-sub { margin: 4px 0 0; font-size: 13px; opacity: 0.8; }
+      .edit-header::before {
+        content: '';
+        position: absolute;
+        top: -50%; left: -50%;
+        width: 200%; height: 200%;
+        background: conic-gradient(from 0deg, transparent, rgba(255,255,255,0.06), transparent 30%);
+        animation: editShine 6s linear infinite;
+      }
+      @keyframes editShine {
+        to { transform: rotate(360deg); }
+      }
+      .edit-icon { font-size: 36px; margin-bottom: 8px; position: relative; }
+      .edit-header h3 { margin: 0; font-size: 22px; font-weight: 800; position: relative; }
+      .edit-sub { margin: 6px 0 0; font-size: 13px; opacity: 0.75; position: relative; }
       .edit-body { padding: 24px 28px 16px; overflow-y: auto; flex: 1; }
       .field { margin-bottom: 16px; }
       .field-row { display: grid; grid-template-columns: 1fr 120px; gap: 12px; }
@@ -769,37 +781,60 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
       }
       .upload-zone {
         display: flex; flex-direction: column; align-items: center; justify-content: center;
-        border: 2.5px dashed #d1d5db; border-radius: 18px; padding: 28px 16px;
-        cursor: pointer; transition: all 0.2s; background: #fafafa; text-align: center;
+        border: 2.5px dashed #c8e6c9; border-radius: 18px; padding: 28px 16px;
+        cursor: pointer; transition: all 0.25s; background: #f0f9f1; text-align: center;
+        position: relative; overflow: hidden;
       }
-      .upload-zone:hover { border-color: #4caf50; background: #f0f9f1; }
-      .upload-zone.has-image { padding: 12px; border-style: solid; border-color: #c8e6c9; }
+      .upload-zone:hover {
+        border-color: #43a047; background: #e8f5e9;
+        transform: scale(1.01);
+        box-shadow: 0 4px 16px rgba(76,175,80,0.15);
+      }
+      .upload-zone.has-image {
+        padding: 12px; border-style: solid; border-color: #a5d6a7;
+        background: #fff;
+      }
+      .upload-zone input[type="file"] {
+        position: absolute; inset: 0; opacity: 0; cursor: pointer;
+      }
       .upload-preview {
         max-width: 100%; max-height: 160px; border-radius: 12px; object-fit: cover;
         box-shadow: 0 4px 16px rgba(0,0,0,0.1);
       }
-      .upload-icon { font-size: 36px; margin-bottom: 8px; }
-      .upload-text { font-size: 14px; font-weight: 700; color: #374151; margin-top: 6px; }
-      .upload-hint { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+      .upload-icon { font-size: 42px; margin-bottom: 8px; }
+      .upload-text { font-size: 15px; font-weight: 800; color: #2e7d32; margin-top: 6px; }
+      .upload-hint { font-size: 12px; color: #6b7280; margin-top: 4px; }
       .edit-footer {
-        display: flex; gap: 12px; padding: 16px 28px 24px;
-        border-top: 1px solid #f3f4f6; background: #fafafa;
+        display: flex; gap: 12px; padding: 18px 28px 26px;
+        border-top: 1px solid #e8e4d9; background: #f5f2eb;
       }
       .btn-cancel {
-        flex: 1; padding: 14px; border-radius: 14px; border: 2px solid #e5e7eb;
-        background: #fff; color: #6b7280; font-weight: 700; font-size: 15px; cursor: pointer;
-        transition: all 0.15s;
+        flex: 1; padding: 15px; border-radius: 14px; border: 2px solid #d1d5db;
+        background: #fff; color: #4b5563; font-weight: 700; font-size: 15px; cursor: pointer;
+        transition: all 0.2s;
       }
-      .btn-cancel:hover { border-color: #d1d5db; background: #f3f4f6; }
+      .btn-cancel:hover {
+        border-color: #9ca3af; background: #f3f4f6;
+        transform: translateY(-1px);
+      }
       .btn-save {
-        flex: 1.5; padding: 14px; border-radius: 14px; border: none;
-        background: linear-gradient(135deg, #1b5e20, #43a047);
+        flex: 1.5; padding: 15px 20px; border-radius: 14px; border: none;
+        background: linear-gradient(135deg, #1b5e20, #2e7d32, #43a047);
+        background-size: 200% 200%;
         color: #fff; font-weight: 800; font-size: 15px; cursor: pointer;
-        box-shadow: 0 6px 20px rgba(27,94,32,0.3);
-        transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px;
+        box-shadow: 0 8px 24px rgba(27,94,32,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+        transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+        animation: btnShine 3s ease-in-out infinite;
       }
-      .btn-save:hover { filter: brightness(1.08); transform: translateY(-1px); }
-      .btn-save:disabled { opacity: 0.6; transform: none; cursor: not-allowed; }
+      .btn-save:hover {
+        filter: brightness(1.1);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 32px rgba(27,94,32,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
+      }
+      .btn-save:disabled {
+        opacity: 0.5; transform: none; cursor: not-allowed;
+        animation: none;
+      }
       .spinner {
         width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3);
         border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite;
