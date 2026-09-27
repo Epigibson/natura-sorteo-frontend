@@ -94,19 +94,90 @@ export class Hero3DComponent implements AfterViewInit, OnDestroy {
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.2;
 
-    // ===== TORUS KNOT DORADO =====
-    const torusGeo = new THREE.TorusKnotGeometry(1, 0.35, 128, 24, 2, 3);
-    const torusMat = new THREE.MeshStandardMaterial({
+    // ===== BOLETO 3D =====
+    // Forma de boleto: rectángulo con muescas laterales
+    const ticketShape = new THREE.Shape();
+    const tw = 1.6; // ancho
+    const th = 1.0; // alto
+    const notch = 0.18; // radio de las muescas
+    const corner = 0.12; // radio de esquinas
+
+    // Rectángulo redondeado con muescas en los lados
+    ticketShape.moveTo(-tw + corner, -th);
+    ticketShape.lineTo(tw - corner, -th);
+    ticketShape.quadraticCurveTo(tw, -th, tw, -th + corner);
+    ticketShape.lineTo(tw, -notch);
+    // Muesca derecha
+    ticketShape.absarc(tw, 0, notch, -Math.PI / 2, Math.PI / 2, true);
+    ticketShape.lineTo(tw, th - corner);
+    ticketShape.quadraticCurveTo(tw, th, tw - corner, th);
+    ticketShape.lineTo(-tw + corner, th);
+    ticketShape.quadraticCurveTo(-tw, th, -tw, th - corner);
+    ticketShape.lineTo(-tw, notch);
+    // Muesca izquierda
+    ticketShape.absarc(-tw, 0, notch, Math.PI / 2, -Math.PI / 2, true);
+    ticketShape.lineTo(-tw, -th + corner);
+    ticketShape.quadraticCurveTo(-tw, -th, -tw + corner, -th);
+
+    const extrudeSettings = {
+      depth: 0.12,
+      bevelEnabled: true,
+      bevelThickness: 0.03,
+      bevelSize: 0.03,
+      bevelSegments: 3,
+    };
+
+    const ticketGeo = new THREE.ExtrudeGeometry(ticketShape, extrudeSettings);
+    ticketGeo.center();
+
+    // Material dorado para el boleto
+    const ticketMat = new THREE.MeshStandardMaterial({
       color: 0xc9a227,
-      metalness: 0.95,
-      roughness: 0.15,
+      metalness: 0.85,
+      roughness: 0.2,
       emissive: 0xc9a227,
-      emissiveIntensity: 0.15,
+      emissiveIntensity: 0.12,
     });
-    this.torusKnot = new THREE.Mesh(torusGeo, torusMat);
-    this.torusKnot.position.set(0, 0, -2);
-    this.torusKnot.scale.setScalar(isMobile ? 0.7 : 1);
+
+    this.torusKnot = new THREE.Mesh(ticketGeo, ticketMat);
+    this.torusKnot.position.set(0, 0, -1.5);
+    this.torusKnot.scale.setScalar(isMobile ? 0.85 : 1.1);
+    this.torusKnot.rotation.set(-0.3, 0.4, 0.1);
     this.scene.add(this.torusKnot);
+
+    // Línea decorativa en el centro del boleto (como perforación)
+    const lineGeo = new THREE.PlaneGeometry(0.02, th * 1.7);
+    const lineMat = new THREE.MeshBasicMaterial({
+      color: 0x8d6e00,
+      transparent: true,
+      opacity: 0.35,
+    });
+    const centerLine = new THREE.Mesh(lineGeo, lineMat);
+    centerLine.position.set(0, 0, 0.08);
+    this.torusKnot.add(centerLine);
+
+    // Texto "N" en el boleto (simulado con un plano pequeño)
+    const textPlaneGeo = new THREE.PlaneGeometry(0.5, 0.35);
+    const textCanvas = document.createElement('canvas');
+    textCanvas.width = 128;
+    textCanvas.height = 90;
+    const ctx2 = textCanvas.getContext('2d')!;
+    ctx2.fillStyle = 'transparent';
+    ctx2.fillRect(0, 0, 128, 90);
+    ctx2.fillStyle = '#8d6e00';
+    ctx2.font = 'bold 48px Arial';
+    ctx2.textAlign = 'center';
+    ctx2.textBaseline = 'middle';
+    ctx2.fillText('N', 64, 45);
+    const textTexture = new THREE.CanvasTexture(textCanvas);
+    const textMat = new THREE.MeshBasicMaterial({
+      map: textTexture,
+      transparent: true,
+      opacity: 0.6,
+    });
+    const textPlane = new THREE.Mesh(textPlaneGeo, textMat);
+    textPlane.position.set(0.65, 0, 0.08);
+    this.torusKnot.add(textPlane);
 
     // Luces para el torus
     const ambientLight = new THREE.AmbientLight(0x1a1a2e, 0.6);
@@ -196,14 +267,17 @@ export class Hero3DComponent implements AfterViewInit, OnDestroy {
     const delta = this.clock.getDelta();
     this.time += delta;
 
-    // Rotación del torus knot
+    // Flotación y rotación suave del boleto
     if (this.torusKnot) {
-      this.torusKnot.rotation.x += delta * 0.15;
-      this.torusKnot.rotation.y += delta * 0.22;
-
-      // Mouse parallax en el torus
-      this.torusKnot.position.x += (this.mouse.x * 0.6 - this.torusKnot.position.x) * 0.03;
-      this.torusKnot.position.y += (this.mouse.y * 0.4 - this.torusKnot.position.y) * 0.03;
+      // Flotación vertical
+      this.torusKnot.position.y = Math.sin(this.time * 0.8) * 0.15;
+      // Rotación suave en Y (como si se meciera)
+      this.torusKnot.rotation.y = Math.sin(this.time * 0.5) * 0.35 + 0.4;
+      // Ligera inclinación en X
+      this.torusKnot.rotation.x = Math.sin(this.time * 0.6) * 0.12 - 0.3;
+      // Mouse parallax
+      this.torusKnot.position.x += (this.mouse.x * 0.5 - this.torusKnot.position.x) * 0.03;
+      this.torusKnot.rotation.z += (this.mouse.x * 0.1 - this.torusKnot.rotation.z) * 0.02;
     }
 
     // Partículas
