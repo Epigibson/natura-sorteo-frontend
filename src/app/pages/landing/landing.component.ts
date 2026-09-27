@@ -446,7 +446,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
 
     .hero-sub {
       font-size: clamp(15px, 2.5vw, 18px);
-      color: rgba(255,255,255,0.6);
+      color: rgba(255,255,255,0.7);
       line-height: 1.6;
       margin-bottom: 36px;
       max-width: 500px;
@@ -525,7 +525,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     }
     .pc-value {
       font-size: 13px;
-      color: rgba(255,255,255,0.5);
+      color: rgba(255,255,255,0.6);
     }
 
     /* STATS */
@@ -551,7 +551,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     }
     .hs-t {
       font-size: 11px;
-      color: rgba(255,255,255,0.45);
+      color: rgba(255,255,255,0.55);
       text-transform: uppercase;
       letter-spacing: 1px;
       margin-top: 2px;
@@ -605,7 +605,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     }
     .cd-date {
       font-size: 12px;
-      color: rgba(255,255,255,0.5);
+      color: rgba(255,255,255,0.6);
     }
 
     /* WINNER */
@@ -668,7 +668,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     .cta-note {
       margin-top: 14px;
       font-size: 12px;
-      color: rgba(255,255,255,0.35);
+      color: rgba(255,255,255,0.5);
     }
 
     /* LOADING */
@@ -720,8 +720,8 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     }
     .sh-badge {
       display: inline-block;
-      background: rgba(27,94,32,0.1);
-      color: #1b5e20;
+      background: rgba(76,175,80,0.15);
+      color: #81c784;
       padding: 6px 18px;
       border-radius: 999px;
       font-size: 11px;
@@ -730,20 +730,17 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       margin-bottom: 14px;
     }
     .sh-badge-gold {
-      background: rgba(201,162,39,0.15);
-      color: #c9a227;
+      background: rgba(201,162,39,0.2);
+      color: #f0c94e;
     }
     .sh-title {
       font-size: clamp(24px, 4vw, 36px);
       font-weight: 800;
-      color: #1a1a2e;
+      color: #fff;
       margin-bottom: 10px;
     }
-    .section-dark .sh-title {
-      color: #fff;
-    }
     .sh-sub {
-      color: #6b7280;
+      color: rgba(255,255,255,0.5);
       font-size: 16px;
     }
 
@@ -792,7 +789,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     .step-num {
       font-size: 52px;
       font-weight: 900;
-      color: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.08);
       line-height: 1;
       margin-bottom: -12px;
     }
@@ -826,7 +823,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     }
     .step-card p {
       font-size: 13px;
-      color: rgba(255,255,255,0.45);
+      color: rgba(255,255,255,0.55);
       line-height: 1.6;
     }
     .step-glow {
@@ -860,7 +857,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     .sc-dot {
       width: 5px;
       height: 5px;
-      background: rgba(201,162,39,0.5);
+      background: rgba(201,162,39,0.7);
       border-radius: 50%;
     }
     .sc-dot:nth-child(2) { opacity: 0.7; }
@@ -930,7 +927,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       margin-bottom: 8px;
     }
     .feature-card p {
-      color: rgba(255,255,255,0.45);
+      color: rgba(255,255,255,0.55);
       font-size: 13px;
       line-height: 1.6;
     }
@@ -975,7 +972,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     }
     .sb-t {
       font-size: 11px;
-      color: rgba(255,255,255,0.4);
+      color: rgba(255,255,255,0.55);
       text-transform: uppercase;
       letter-spacing: 1px;
       margin-top: 4px;
@@ -994,7 +991,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     }
     .cta-guarantee span {
       font-size: 12px;
-      color: rgba(255,255,255,0.35);
+      color: rgba(255,255,255,0.5);
     }
     .cta-section {
       position: relative;
@@ -1023,7 +1020,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       margin-bottom: 10px;
     }
     .cta-content p {
-      color: rgba(255,255,255,0.5);
+      color: rgba(255,255,255,0.6);
       margin-bottom: 28px;
       font-size: 16px;
     }
@@ -1056,14 +1053,14 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     }
     .footer-links span {
       font-size: 12px;
-      color: rgba(255,255,255,0.3);
+      color: rgba(255,255,255,0.45);
     }
     .footer-dot {
       color: rgba(201,162,39,0.4) !important;
     }
     .footer-copy {
       font-size: 11px;
-      color: rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.3);
     }
 
 
