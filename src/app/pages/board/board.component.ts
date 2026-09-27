@@ -86,13 +86,16 @@ interface BoardData {
               [class.tile-free]="card.status === 'free'"
               [class.tile-taken]="card.status !== 'free' && card.status !== 'paid'"
               [class.tile-paid]="card.status === 'paid'"
+              [class.tile-mine]="claimedFolios.has(card.folio)"
               [class.tile-winner]="data()?.winner_folio === card.folio && data()?.drawn"
-              (click)="selectCard(card)"
+              (click)="claimedFolios.has(card.folio) ? scratchClaimed(card) : selectCard(card)"
             >
               <div class="tile-folio">{{ pad(card.folio) }}</div>
               <div class="tile-status">{{ statusLabel(card) }}</div>
-              @if (card.status === 'free') {
-                <div class="tile-action">Toca para raspar</div>
+              @if (claimedFolios.has(card.folio)) {
+                <div class="tile-action">👆 Raspar</div>
+              } @else if (card.status === 'free') {
+                <div class="tile-action">Toca para elegir</div>
               }
             </button>
           }
@@ -311,6 +314,13 @@ interface BoardData {
         color: #1b5e20;
       }
 
+      .tile-mine {
+        background: linear-gradient(145deg, #e3f2fd, #90caf9);
+        box-shadow: 0 4px 16px rgba(33,150,243,0.35);
+        border: 2px solid #42a5f5;
+      }
+      .tile-mine .tile-folio { color: #0d47a1; }
+      .tile-mine .tile-action { color: #1565c0; font-weight: 800; }
       .tile-winner {
         background: linear-gradient(145deg, #fff9c4, #ffe082);
         box-shadow: 0 4px 20px rgba(255, 193, 7, 0.5);
@@ -505,6 +515,8 @@ export class BoardComponent implements OnInit {
   selected = signal<BoardCard | null>(null);
   regName = '';
   regPhone = '';
+  claimedFolios = new Set<number>();
+  claimedCodes: Record<number, string> = {};
   claiming = signal(false);
   error = signal('');
   slug = '';
@@ -567,6 +579,17 @@ export class BoardComponent implements OnInit {
     this.error.set('');
   }
 
+  scratchClaimed(card: BoardCard) {
+    const code = this.claimedCodes[card.folio];
+    if (!code) {
+      this.toast.error('Error', 'No se encontró el código de este boleto');
+      return;
+    }
+    this.router.navigate(['/jugar', this.slug], {
+      queryParams: { folio: card.folio, cod: code },
+    });
+  }
+
   claimTicket() {
     const sel = this.selected();
     if (!sel) return;
@@ -586,11 +609,13 @@ export class BoardComponent implements OnInit {
     this.api.claimTicket(this.slug, { folio: sel.folio, name, phone }).subscribe({
       next: (res: any) => {
         this.claiming.set(false);
-        this.toast.success('¡Boleto asignado!', 'Folio ' + this.pad(sel.folio) + ' es tuyo. Ahora raspa.');
-        // Ir al raspadito con el codigo que devuelve el backend
-        this.router.navigate(['/jugar', this.slug], {
-          queryParams: { folio: sel.folio, cod: res.code },
-        });
+        this.selected.set(null);
+        this.toast.success('¡Boleto asignado!', 'Folio ' + this.pad(sel.folio) + ' es tuyo. Puedes reclamar más o rasparlo.');
+        // Guardar código para poder raspar después
+        this.claimedCodes[sel.folio] = res.code;
+        this.claimedFolios.add(sel.folio);
+        // Recargar tablero
+        this.ngOnInit();
       },
       error: (err: any) => {
         this.claiming.set(false);
