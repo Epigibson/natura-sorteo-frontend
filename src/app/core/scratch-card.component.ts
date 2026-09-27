@@ -19,7 +19,7 @@ import { CommonModule } from '@angular/common';
     <div class="scratch-wrap" #wrap>
       <div class="prize-side">
         <div class="label">Tu boleto cuesta</div>
-        <div class="amount">\${{ amount }}</div>
+        <div class="amount">{{ isRevealed() ? '\$' + amount : '\$?' }}</div>
         <div class="pie">Paga este monto y asegura tu lugar</div>
       </div>
       <canvas #canvas id="scratchCanvas"></canvas>
@@ -30,7 +30,7 @@ import { CommonModule } from '@angular/common';
     </div>
 
     @if (isRevealed()) {
-      <div class="hint success">¡Tu boleto cuesta \${{ amount }}! 🎉</div>
+      <div class="hint success">{{ isRevealed() ? '¡Tu boleto cuesta \$' + amount + '!' : 'Raspa para descubrir' }}</div>
     } @else {
       <div class="hint">Raspa con el dedo la zona plateada ✨</div>
     }

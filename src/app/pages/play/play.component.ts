@@ -377,7 +377,6 @@ export class PlayComponent implements OnInit {
             this.paso.set('registro');
           } else {
             this.paso.set('raspa');
-            this.precargarMonto();
           }
         },
         error: (err) => {
@@ -397,19 +396,9 @@ export class PlayComponent implements OnInit {
     window.location.href = `/sorteo/${this.slug}/tablero`;
   }
 
-  /** Obtiene el monto del servidor para mostrarlo detrás del canvas. */
+  /** Ya NO precarga el monto — se obtiene solo después de raspar. */
   private precargarMonto() {
-    if (this.amount()) return;
-    this.api
-      .scratch({ folio: this.folio, code: this.code, raffle_slug: this.slug })
-      .subscribe({
-        next: (res) => {
-          this.amount.set(res.amount);
-        },
-        error: () => {
-          // Si falla, al raspar se intentará de nuevo
-        },
-      });
+    // Intencionalmente vacío: el monto se descubre al raspar
   }
 
   register() {
@@ -437,7 +426,6 @@ export class PlayComponent implements OnInit {
           this.loading.set(false);
           this.toast.success('Registro exitoso', `¡Bienvenida, ${this.name.split(' ')[0]}!`);
           this.paso.set('raspa');
-          this.precargarMonto();
         },
         error: (err) => {
           this.loading.set(false);
@@ -450,24 +438,19 @@ export class PlayComponent implements OnInit {
   /** Se dispara cuando el canvas se raspa lo suficiente. */
   onScratchRevealed() {
     this.revealed.set(true);
-    if (!this.amount()) {
-      // Si no teníamos el monto, pedirlo ahora
-      this.api
-        .scratch({ folio: this.folio, code: this.code, raffle_slug: this.slug })
-        .subscribe({
-          next: (res) => {
-            this.amount.set(res.amount);
-            this.toast.success('¡Boleto raspado!', `Tu precio es $${res.amount} 🎉`);
-            setTimeout(() => this.paso.set('resultado'), 1100);
-          },
-          error: (err) => {
-            this.toast.error('Error', err?.error?.detail || 'No se pudo obtener el monto');
-          },
-        });
-    } else {
-      this.toast.success('¡Boleto raspado!', `Tu precio es $${this.amount()} 🎉`);
-      setTimeout(() => this.paso.set('resultado'), 1100);
-    }
+    // Obtener monto SOLO después de raspar (anti-trampa: no estaba en el DOM antes)
+    this.api
+      .scratch({ folio: this.folio, code: this.code, raffle_slug: this.slug })
+      .subscribe({
+        next: (res) => {
+          this.amount.set(res.amount);
+          this.toast.success('¡Boleto raspado!', `Tu precio es $${res.amount} 🎉`);
+          setTimeout(() => this.paso.set('resultado'), 1100);
+        },
+        error: (err) => {
+          this.toast.error('Error', err?.error?.detail || 'No se pudo obtener el monto');
+        },
+      });
   }
 
   sendWhatsApp() {
