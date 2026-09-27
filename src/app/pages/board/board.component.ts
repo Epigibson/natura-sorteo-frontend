@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../../core/api.service';
+import { ScratchCardComponent } from '../../core/scratch-card.component';
 import { ToastService } from '../../core/toast.service';
 
 interface BoardCard {
@@ -29,7 +30,7 @@ interface BoardData {
 @Component({
   selector: 'app-board',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ScratchCardComponent],
   template: `
     <div class="board-page">
       <!-- HEADER -->
@@ -59,47 +60,84 @@ interface BoardData {
         </div>
       }
 
-      <!-- LEYENDA -->
-      <div class="legend">
-        <div class="leg-item">
-          <span class="dot dot-free"></span> Disponible
-        </div>
-        <div class="leg-item">
-          <span class="dot dot-taken"></span> Tomado
-        </div>
-        <div class="leg-item">
-          <span class="dot dot-paid"></span> Pagado
-        </div>
-        <div class="leg-item">
-          <span class="dot dot-winner"></span> Ganador
-        </div>
-      </div>
+      @if (scratchMode()) {
+        <!-- PANTALLA RASPABR TODOS -->
+        <div class="scratch-screen">
+          <div class="ss-header">
+            <h2>👆 Raspa tus boletos</h2>
+            <p>Desliza el dedo sobre cada boleto para descubrir tu precio</p>
+          </div>
+          <div class="ss-cards">
+            @for (folio of getClaimedFoliosArray(); track folio) {
+              <div class="ss-card-wrap">
+                <app-scratch-card
+                  [amount]="0"
+                  (revealed)="onTicketScratched({ folio: folio, amount: getAmountForFolio(folio) })"
+                />
+                <div class="ss-folio-label">Folio {{ pad(folio) }}</div>
+              </div>
+            }
+          </div>
 
-      <!-- TABLERO -->
-      @if (loading()) {
-        <div class="loading">Cargando boletos…</div>
-      } @else {
-        <div class="grid">
-          @for (card of cards(); track card.folio) {
-            <button
-              class="tile"
-              [class.tile-free]="card.status === 'free'"
-              [class.tile-taken]="card.status !== 'free' && card.status !== 'paid'"
-              [class.tile-paid]="card.status === 'paid'"
-              [class.tile-mine]="claimedFolios.has(card.folio)"
-              [class.tile-winner]="data()?.winner_folio === card.folio && data()?.drawn"
-              (click)="claimedFolios.has(card.folio) ? scratchClaimed(card) : selectCard(card)"
-            >
-              <div class="tile-folio">{{ pad(card.folio) }}</div>
-              <div class="tile-status">{{ statusLabel(card) }}</div>
-              @if (claimedFolios.has(card.folio)) {
-                <div class="tile-action">👆 Raspar</div>
-              } @else if (card.status === 'free') {
-                <div class="tile-action">Toca para elegir</div>
+          @if (allScratched()) {
+            <div class="ss-results">
+              <h3>🎉 ¡Tus boletos!</h3>
+              @for (r of scratchedResults(); track r.folio) {
+                <div class="ss-result-row">
+                  <span class="ss-r-folio">Folio {{ pad(r.folio) }}</span>
+                  <span class="ss-r-amount">\${{ r.amount }}</span>
+                </div>
               }
-            </button>
+              <div class="ss-total">Total: <strong>\${{ getTotal() }}</strong></div>
+              <button class="btn-wa-big" (click)="sendAllWhatsApp()">📲 Enviar a la organizadora por WhatsApp</button>
+            </div>
           }
+
+          <button class="btn-back" (click)="exitScratchMode()">← Volver al tablero</button>
         </div>
+      } @else {
+        <!-- BOTÓN RASPABR BOLETOS -->
+        @if (claimedFolios.size > 0 && !loading()) {
+          <div class="scratch-cta">
+            <div class="sc-info">Tienes <strong>{{ claimedFolios.size }}</strong> boleto(s) listo(s) para raspar</div>
+            <button class="btn-scratch-all" (click)="goScratchMode()">👆 Raspar {{ claimedFolios.size > 1 ? 'mis boletos' : 'mi boleto' }}</button>
+          </div>
+        }
+
+        <!-- LEYENDA -->
+        <div class="legend">
+          <div class="leg-item"><span class="dot dot-free"></span> Disponible</div>
+          <div class="leg-item"><span class="dot dot-mine"></span> Mío</div>
+          <div class="leg-item"><span class="dot dot-taken"></span> Tomado</div>
+          <div class="leg-item"><span class="dot dot-paid"></span> Pagado</div>
+        </div>
+
+        <!-- TABLERO -->
+        @if (loading()) {
+          <div class="loading">Cargando boletos…</div>
+        } @else {
+          <div class="grid">
+            @for (card of cards(); track card.folio) {
+              <button
+                class="tile"
+                [class.tile-free]="card.status === 'free'"
+                [class.tile-taken]="card.status !== 'free' && card.status !== 'paid'"
+                [class.tile-paid]="card.status === 'paid'"
+                [class.tile-mine]="claimedFolios.has(card.folio)"
+                [class.tile-winner]="data()?.winner_folio === card.folio && data()?.drawn"
+                (click)="claimedFolios.has(card.folio) ? goScratchMode() : selectCard(card)"
+              >
+                <div class="tile-folio">{{ pad(card.folio) }}</div>
+                <div class="tile-status">{{ statusLabel(card) }}</div>
+                @if (claimedFolios.has(card.folio)) {
+                  <div class="tile-action">✅ Tuyo</div>
+                } @else if (card.status === 'free') {
+                  <div class="tile-action">Toca para elegir</div>
+                }
+              </button>
+            }
+          </div>
+        }
       }
 
       <!-- MODAL: registro antes de asignar -->
@@ -243,6 +281,7 @@ interface BoardData {
       .dot-paid {
         background: #43a047;
       }
+      .dot-mine { background: #42a5f5; }
       .dot-winner {
         background: #ffd54f;
       }
@@ -478,6 +517,125 @@ interface BoardData {
         text-align: center;
       }
 
+      .scratch-cta {
+        background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        border: 2px solid #42a5f5;
+        border-radius: 18px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+        max-width: 480px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .sc-info {
+        color: #0d47a1;
+        font-size: 15px;
+        margin-bottom: 14px;
+      }
+      .btn-scratch-all {
+        padding: 14px 36px;
+        border: none;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #1565c0, #42a5f5);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 6px 20px rgba(21,101,192,0.35);
+        transition: all 0.15s;
+      }
+      .btn-scratch-all:hover { transform: translateY(-2px); }
+
+      .scratch-screen {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      .ss-header {
+        text-align: center;
+        color: #fff;
+        margin-bottom: 24px;
+      }
+      .ss-header h2 {
+        font-size: 22px;
+        margin: 0 0 6px;
+      }
+      .ss-header p {
+        opacity: 0.8;
+        font-size: 13px;
+      }
+      .ss-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        align-items: center;
+      }
+      .ss-card-wrap {
+        text-align: center;
+      }
+      .ss-folio-label {
+        color: rgba(255,255,255,0.8);
+        font-size: 13px;
+        font-weight: 700;
+        margin-top: 6px;
+      }
+      .ss-results {
+        background: rgba(255,255,255,0.1);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 20px;
+        padding: 24px;
+        margin-top: 28px;
+        color: #fff;
+      }
+      .ss-results h3 {
+        text-align: center;
+        margin: 0 0 16px;
+        font-size: 20px;
+      }
+      .ss-result-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 14px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 10px;
+        margin-bottom: 8px;
+      }
+      .ss-r-folio { font-weight: 700; }
+      .ss-r-amount { font-weight: 900; color: #ffe082; }
+      .ss-total {
+        text-align: right;
+        font-size: 18px;
+        padding: 12px 14px;
+        color: #ffe082;
+      }
+      .btn-wa-big {
+        width: 100%;
+        padding: 16px;
+        border: none;
+        border-radius: 14px;
+        background: #25d366;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        cursor: pointer;
+        margin-top: 16px;
+        box-shadow: 0 6px 20px rgba(37,211,102,0.35);
+      }
+      .btn-back {
+        display: block;
+        width: 100%;
+        margin-top: 16px;
+        padding: 12px;
+        border: 2px solid rgba(255,255,255,0.2);
+        border-radius: 12px;
+        background: transparent;
+        color: rgba(255,255,255,0.7);
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
       .foot {
         text-align: center;
         color: rgba(255, 255, 255, 0.55);
@@ -517,6 +675,9 @@ export class BoardComponent implements OnInit {
   regPhone = '';
   claimedFolios = new Set<number>();
   claimedCodes: Record<number, string> = {};
+  scratchMode = signal(false);
+  scratchedResults = signal<{ folio: number; amount: number }[]>([]);
+  allScratched = signal(false);
   claiming = signal(false);
   error = signal('');
   slug = '';
@@ -541,6 +702,18 @@ export class BoardComponent implements OnInit {
         this.toast.error('Sorteo no encontrado', 'Verifica el enlace');
       },
     });
+  }
+
+  getClaimedFoliosArray(): number[] {
+    return Array.from(this.claimedFolios);
+  }
+
+  getAmountForFolio(folio: number): number {
+    return this.scratchedResults().find(r => r.folio === folio)?.amount || 0;
+  }
+
+  getTotal(): number {
+    return this.scratchedResults().reduce((a, r) => a + r.amount, 0);
   }
 
   pad(n: number): string {
@@ -570,13 +743,63 @@ export class BoardComponent implements OnInit {
       return;
     }
     if (c.status !== 'free') {
-      this.toast.warning('Boleto tomado', 'El folio ' + this.pad(c.folio) + ' ya lo tiene alguien. Elige otro.');
+      this.toast.warning('Boleto tomado', 'El folio ' + this.pad(c.folio) + ' ya lo tiene alguien.');
+      return;
+    }
+    // Si ya está registrado, reclamar directo
+    const savedName = localStorage.getItem('sn_name');
+    const savedPhone = localStorage.getItem('sn_phone');
+    if (savedName && savedPhone) {
+      this.regName = savedName;
+      this.regPhone = savedPhone;
+      this.claimTicket();
       return;
     }
     this.selected.set(c);
     this.regName = '';
     this.regPhone = '';
     this.error.set('');
+  }
+
+  goScratchMode() {
+    if (this.claimedFolios.size === 0) {
+      this.toast.warning('Sin boletos', 'Primero reclama al menos un boleto');
+      return;
+    }
+    this.scratchMode.set(true);
+    this.scratchedResults.set([]);
+    this.allScratched.set(false);
+  }
+
+  exitScratchMode() {
+    this.scratchMode.set(false);
+    this.ngOnInit();
+  }
+
+  onTicketScratched(result: { folio: number; amount: number }) {
+    const results = [...this.scratchedResults(), result];
+    this.scratchedResults.set(results);
+    if (results.length >= this.claimedFolios.size) {
+      this.allScratched.set(true);
+    }
+  }
+
+  sendAllWhatsApp() {
+    const results = this.scratchedResults();
+    const name = localStorage.getItem('sn_name') || '';
+    const phone = localStorage.getItem('sn_phone') || '';
+    const r = this.data();
+    let msg = '🎟️ REGISTRO — ' + (r?.title || 'Sorteo Natura') + '\n\n';
+    msg += '👤 Nombre: ' + name + '\n';
+    msg += '📱 Teléfono: ' + phone + '\n\n';
+    msg += 'Mis boletos:\n';
+    for (const res of results) {
+      msg += '  Folio ' + this.pad(res.folio) + ' → $' + res.amount + '\n';
+    }
+    msg += '\n💰 Total: $' + results.reduce((a, r2) => a + r2.amount, 0);
+    msg += '\n\nPor favor confirma mis boletos. ¡Gracias! 🍀';
+    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+    this.toast.success('WhatsApp abierto', 'Envía el mensaje a la organizadora');
   }
 
   scratchClaimed(card: BoardCard) {
@@ -614,6 +837,8 @@ export class BoardComponent implements OnInit {
         // Guardar código para poder raspar después
         this.claimedCodes[sel.folio] = res.code;
         this.claimedFolios.add(sel.folio);
+        localStorage.setItem('sn_name', this.regName);
+        localStorage.setItem('sn_phone', this.regPhone);
         // Recargar tablero
         this.ngOnInit();
       },
