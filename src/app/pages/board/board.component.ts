@@ -374,71 +374,69 @@ interface BoardData {
         align-items: center;
         justify-content: center;
         gap: 5px;
-        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        transition: all 0.25s ease;
         position: relative;
         overflow: hidden;
-        backdrop-filter: blur(8px);
+        border: none;
       }
       .tile:hover {
-        transform: translateY(-6px) scale(1.04);
-        box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+        z-index: 3;
       }
       .tile:active {
-        transform: scale(0.95);
+        transform: scale(0.94);
       }
       .tile-free {
-        background: linear-gradient(135deg, rgba(27,94,32,0.45), rgba(76,175,80,0.3));
-        border: 1.5px solid rgba(76,175,80,0.45);
-        box-shadow: 0 4px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06);
+        background: linear-gradient(145deg, #43a047, #2e7d32);
+        box-shadow: 0 4px 16px rgba(67,160,71,0.35), inset 0 2px 0 rgba(255,255,255,0.15);
       }
       .tile-free:hover {
-        background: linear-gradient(135deg, rgba(27,94,32,0.6), rgba(76,175,80,0.45));
-        border-color: rgba(129,199,132,0.7);
-        box-shadow: 0 12px 32px rgba(76,175,80,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+        background: linear-gradient(145deg, #66bb6a, #43a047);
+        box-shadow: 0 12px 36px rgba(67,160,71,0.5), inset 0 2px 0 rgba(255,255,255,0.2);
       }
-      .tile-free .tile-folio { color: #b9f6ca; text-shadow: 0 2px 8px rgba(76,175,80,0.3); }
-      .tile-free .tile-status { color: rgba(200,230,201,0.8); }
-      .tile-free .tile-action { color: #a5d6a7; }
+      .tile-free .tile-folio { color: #ffffff; }
+      .tile-free .tile-status { color: rgba(255,255,255,0.75); }
+      .tile-free .tile-action { color: rgba(255,255,255,0.7); }
       .tile-taken {
-        background: linear-gradient(135deg, rgba(255,152,0,0.2), rgba(255,152,0,0.1));
-        border: 1.5px solid rgba(255,152,0,0.3);
-        opacity: 0.85;
+        background: linear-gradient(145deg, #ef6c00, #e65100);
+        box-shadow: 0 4px 16px rgba(239,108,0,0.3), inset 0 2px 0 rgba(255,255,255,0.12);
+        opacity: 0.88;
       }
       .tile-taken:hover {
         transform: none;
-        box-shadow: none;
+        box-shadow: 0 4px 16px rgba(239,108,0,0.3);
       }
-      .tile-taken .tile-folio { color: #ffb74d; text-shadow: 0 2px 8px rgba(255,152,0,0.2); }
-      .tile-taken .tile-status { color: rgba(255,213,128,0.7); }
+      .tile-taken .tile-folio { color: #ffffff; }
+      .tile-taken .tile-status { color: rgba(255,255,255,0.7); }
       .tile-paid {
-        background: linear-gradient(135deg, rgba(27,94,32,0.55), rgba(56,142,60,0.4));
-        border: 1.5px solid rgba(102,187,106,0.5);
-        box-shadow: 0 4px 16px rgba(76,175,80,0.15), inset 0 1px 0 rgba(255,255,255,0.08);
+        background: linear-gradient(145deg, #1b5e20, #0d3b12);
+        box-shadow: 0 4px 16px rgba(27,94,32,0.4), inset 0 2px 0 rgba(255,255,255,0.1);
       }
-      .tile-paid .tile-folio { color: #c8e6c9; text-shadow: 0 2px 8px rgba(76,175,80,0.3); }
-      .tile-paid .tile-status { color: rgba(200,230,201,0.8); }
+      .tile-paid .tile-folio { color: #a5d6a7; }
+      .tile-paid .tile-status { color: rgba(165,214,167,0.8); }
       .tile-mine {
-        background: linear-gradient(135deg, rgba(21,101,192,0.5), rgba(33,150,243,0.35));
-        border: 2px solid rgba(100,181,246,0.6);
-        box-shadow: 0 8px 28px rgba(33,150,243,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+        background: linear-gradient(145deg, #1e88e5, #1565c0);
+        box-shadow: 0 6px 24px rgba(30,136,229,0.45), inset 0 2px 0 rgba(255,255,255,0.18);
+        border: 2.5px solid #64b5f6;
       }
       .tile-mine:hover {
-        background: linear-gradient(135deg, rgba(21,101,192,0.65), rgba(33,150,243,0.5));
-        border-color: rgba(144,202,249,0.8);
-        box-shadow: 0 12px 36px rgba(33,150,243,0.35), inset 0 1px 0 rgba(255,255,255,0.1);
+        background: linear-gradient(145deg, #42a5f5, #1e88e5);
+        box-shadow: 0 12px 36px rgba(30,136,229,0.55), inset 0 2px 0 rgba(255,255,255,0.2);
       }
-      .tile-mine .tile-folio { color: #e3f2fd; text-shadow: 0 2px 8px rgba(33,150,243,0.4); }
-      .tile-mine .tile-action { color: #bbdefb; font-weight: 800; }
+      .tile-mine .tile-folio { color: #ffffff; }
+      .tile-mine .tile-action { color: #e3f2fd; font-weight: 800; }
       .tile-winner {
-        background: linear-gradient(135deg, rgba(201,162,39,0.5), rgba(255,215,0,0.35));
-        border: 2px solid rgba(255,215,0,0.6);
-        box-shadow: 0 8px 32px rgba(255,215,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+        background: linear-gradient(145deg, #f9a825, #f57f17);
+        box-shadow: 0 8px 32px rgba(249,168,37,0.5), inset 0 2px 0 rgba(255,255,255,0.25);
+        border: 3px solid #fdd835;
       }
-      .tile-winner .tile-folio { color: #fff9c4; text-shadow: 0 2px 8px rgba(255,215,0,0.4); }
+      .tile-winner .tile-folio { color: #ffffff; }
       .tile-folio {
         font-size: 30px;
         font-weight: 900;
         line-height: 1;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
       }
       .tile-status {
         font-size: 10px;
