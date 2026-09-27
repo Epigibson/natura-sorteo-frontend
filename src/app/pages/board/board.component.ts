@@ -93,13 +93,13 @@ interface BoardData {
             </div>
           }
 
-          @if (scratchedResults().length === 0) {
+          @if (scratchedResults().length < claimedFolios.size) {
               <button class="btn-back" (click)="exitScratchMode()">← Volver al tablero</button>
             }
         </div>
       } @else {
         <!-- BOTÓN RASPABR BOLETOS -->
-        @if (claimedFolios.size > 0 && scratchedResults().length === 0 && !loading()) {
+        @if (claimedFolios.size > 0 && !loading()) {
           <div class="scratch-cta">
             <div class="sc-info">Tienes <strong>{{ claimedFolios.size }}</strong> boleto(s) listo(s) para raspar</div>
             <button class="btn-scratch-all" (click)="goScratchMode()">👆 Raspar {{ claimedFolios.size > 1 ? 'mis boletos' : 'mi boleto' }}</button>
@@ -161,7 +161,7 @@ interface BoardData {
             <label class="field-label">Número de WhatsApp / celular</label>
             <input class="field-input" [(ngModel)]="regPhone" placeholder="55 1234 5678" type="tel" maxlength="15" />
             <p class="msg" style="font-size:11px; margin-top:8px; margin-bottom:0;">
-              Reclama todos tus boletos primero, luego raspa.
+              Puedes comprar más boletos cuando quieras (hasta el máximo).
             </p>
             <div class="actions">
               <button class="btn-ghost" (click)="selected.set(null)">Cancelar</button>
@@ -883,16 +883,15 @@ export class BoardComponent implements OnInit {
 
   toggleCard(card: BoardCard) {
     if (this.claimedFolios.has(card.folio)) {
-      // No permitir deseleccionar si ya fue raspado
-      const anyScratched = this.scratchedResults().length > 0;
+      // No permitir deseleccionar si YA FUE RASPADO (este boleto específico)
       const thisScratched = this.scratchedResults().some(r => r.folio === card.folio);
-      if (thisScratched || anyScratched || this.scratchMode()) {
-        this.toast.info('Ya empezaste a raspar', 'Ya no puedes cambiar tu selección');
+      if (thisScratched) {
+        this.toast.info('Ya raspado', 'El folio ' + this.pad(card.folio) + ' ya fue raspado, no se puede quitar');
         return;
       }
       this.deselectTicket(card);  // Toggle OFF
     } else {
-      this.selectCard(card);  // Toggle ON
+      this.selectCard(card);  // Toggle ON — permitido incluso si ya raspó otros
     }
   }
 
