@@ -203,9 +203,15 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
                   <input type="date" [(ngModel)]="editDrawDate" />
                 </div>
 
-                <div class="field">
-                  <label>📝 Notas</label>
-                  <textarea [(ngModel)]="editNotes" rows="2" placeholder="Notas internas…"></textarea>
+                <div class="field-row">
+                  <div class="field">
+                    <label>📝 Notas</label>
+                    <textarea [(ngModel)]="editNotes" rows="2" placeholder="Notas internas…"></textarea>
+                  </div>
+                  <div class="field field-sm">
+                    <label>🎟️ Máx boletos/persona</label>
+                    <input type="number" [(ngModel)]="editMaxTickets" min="0" />
+                  </div>
                 </div>
 
                 <div class="field">
@@ -1057,6 +1063,7 @@ export class RaffleDetailComponent implements OnInit {
     this.editDrawDate = r.draw_date || '';
     this.editNotes = r.notes || '';
     this.editImageUrl = (r as any).image_url || '';
+    this.editMaxTickets = (r as any).max_tickets_per_person ?? 3;
     this.editOpen.set(true);
   }
 
@@ -1067,6 +1074,7 @@ export class RaffleDetailComponent implements OnInit {
   editDrawDate = '';
   editNotes = '';
   editImageUrl = '';
+  editMaxTickets = 3;
   editSaving = signal(false);
 
   onPhotoChange(event: Event) {
@@ -1099,6 +1107,7 @@ export class RaffleDetailComponent implements OnInit {
       draw_date: this.editDrawDate || null,
       notes: this.editNotes || null,
       image_url: this.editImageUrl || null,
+      max_tickets_per_person: this.editMaxTickets,
     };
     this.editSaving.set(true);
     this.api.updateRaffle(this.raffleId, body).subscribe({

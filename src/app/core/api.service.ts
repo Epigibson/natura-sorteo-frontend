@@ -32,6 +32,7 @@ export class ApiService {
     price_max: number;
     draw_date?: string;
     notes?: string;
+    max_tickets_per_person?: number;
   }): Observable<Raffle> {
     return this.http.post<Raffle>(`${API}/raffles`, body);
   }

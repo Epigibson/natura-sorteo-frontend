@@ -70,6 +70,10 @@ import { ToastService } from '../../core/toast.service';
         <label>Notas (opcional)</label>
         <textarea [(ngModel)]="notes" rows="3" placeholder="Instrucciones internas…"></textarea>
 
+        <label>Máximo de boletos por persona</label>
+        <input type="number" [(ngModel)]="maxTickets" min="0" placeholder="3" />
+        <div class="hint">0 = sin límite. 3 = cada persona puede comprar hasta 3 boletos.</div>
+
         @if (error()) {
           <div class="error">{{ error() }}</div>
         }
@@ -203,6 +207,7 @@ export class RaffleCreateComponent {
   priceMax = 50;
   drawDate = '';
   notes = '';
+  maxTickets = 3;
   loading = signal(false);
   error = signal('');
 
@@ -249,6 +254,7 @@ export class RaffleCreateComponent {
         price_max: this.priceMax,
         draw_date: this.drawDate || undefined,
         notes: this.notes || undefined,
+        max_tickets_per_person: this.maxTickets,
       })
       .subscribe({
         next: (r) => {
