@@ -24,6 +24,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'participantes',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/participants/participants.component').then(
+        (m) => m.ParticipantsComponent,
+      ),
+  },
+  {
     path: 'sorteos/:id',
     canActivate: [authGuard],
     loadComponent: () =>

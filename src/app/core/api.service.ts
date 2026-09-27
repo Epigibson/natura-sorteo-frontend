@@ -89,6 +89,20 @@ export class ApiService {
     });
   }
 
+  updateRaffle(id: string, body: any): Observable<any> {
+    return this.http.patch<any>(`${API}/raffles/${id}`, body);
+  }
+
+  getParticipants(): Observable<any> {
+    return this.http.get<any>(`${API}/participants`);
+  }
+
+  exportBackup(raffleId: string): Observable<Blob> {
+    return this.http.get(`${API}/raffles/${raffleId}/export/backup`, {
+      responseType: 'blob',
+    });
+  }
+
   changePassword(current: string, next: string): Observable<{ ok: boolean; message: string }> {
     return this.http.post<{ ok: boolean; message: string }>(`${API}/change-password`, {
       current_password: current,

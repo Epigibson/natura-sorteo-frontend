@@ -31,6 +31,8 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
                 <a class="btn-sm btn-open" [href]="boardUrl()" target="_blank">👁 Ver tablero</a>
                 <button class="btn-sm btn-copy" (click)="copyLandingLink()">📋 Landing</button>
                 <a class="btn-sm btn-open" [href]="landingUrl()" target="_blank">👁 Ver landing</a>
+                <button class="btn-sm btn-copy" (click)="editRaffle()">✏️ Editar</button>
+                <button class="btn-sm btn-open" (click)="exportBackup()">💾 Backup</button>
               </div>
             </div>
           </div>
@@ -901,6 +903,43 @@ export class RaffleDetailComponent implements OnInit {
           err?.error?.detail || 'No se pudo generar el archivo',
         );
       },
+    });
+  }
+
+  editRaffle() {
+    const r = this.raffle();
+    if (!r) return;
+    const prize = prompt('Premio:', r.prize);
+    if (prize === null) return;
+    const prizeValue = prompt('Valor del premio:', String(r.prize_value));
+    if (prizeValue === null) return;
+    const drawDate = prompt('Fecha del sorteo (YYYY-MM-DD, vacío = sin cambio):', r.draw_date || '');
+
+    const body: any = { prize: prize.trim(), prize_value: +prizeValue || r.prize_value };
+    if (drawDate !== null && drawDate.trim()) body.draw_date = drawDate.trim();
+
+    this.api.updateRaffle(this.raffleId, body).subscribe({
+      next: () => {
+        this.toast.success('Sorteo actualizado', 'Premio y fecha guardados');
+        this.reload();
+      },
+      error: (err) => this.toast.error('Error', err?.error?.detail || 'No se pudo actualizar'),
+    });
+  }
+
+  exportBackup() {
+    this.api.exportBackup(this.raffleId).subscribe({
+      next: (blob) => {
+        const slug = this.raffle()?.slug || 'sorteo';
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'backup-' + slug + '.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        this.toast.success('Backup descargado', 'backup-' + slug + '.json');
+      },
+      error: (err) => this.toast.error('Error', err?.error?.detail || 'No se pudo generar el backup'),
     });
   }
 
