@@ -4,11 +4,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { ToastService } from '../../core/toast.service';
 import { PublicRaffle } from '../../core/models';
+import { Hero3DComponent } from '../../core/hero-3d.component';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, Hero3DComponent],
   template: `
     <!-- HERO -->
     <section class="hero">
@@ -17,6 +18,7 @@ import { PublicRaffle } from '../../core/models';
         <div class="orb orb-2"></div>
         <div class="orb orb-3"></div>
         <div class="grid-overlay"></div>
+        <app-hero-3d [particleCount]="180" />
       </div>
 
       <nav class="nav">
