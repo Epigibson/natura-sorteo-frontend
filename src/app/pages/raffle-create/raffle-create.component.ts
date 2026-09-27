@@ -139,6 +139,12 @@ import { ToastService } from '../../core/toast.service';
         grid-template-columns: 1fr 1fr;
         gap: 12px;
       }
+      @media (max-width: 480px) {
+        .page { padding: 16px 12px 40px; }
+        .row { grid-template-columns: 1fr; }
+        .preview { grid-template-columns: 1fr; gap: 8px; }
+        h1 { font-size: 22px; }
+      }
       .preview {
         display: grid;
         grid-template-columns: repeat(3, 1fr);

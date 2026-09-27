@@ -165,6 +165,12 @@ import { ToastService } from './toast.service';
       .btn-solid:disabled {
         opacity: 0.5;
       }
+      @media (max-width: 480px) {
+        .dialog { padding: 22px 16px 18px; }
+        .d-icon { font-size: 28px; }
+        h3 { font-size: 16px; }
+        .actions { flex-direction: column-reverse; gap: 8px; }
+      }
     `,
   ],
 })

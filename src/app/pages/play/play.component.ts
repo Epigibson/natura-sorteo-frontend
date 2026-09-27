@@ -302,6 +302,15 @@ type Paso = 'acceso' | 'registro' | 'raspa' | 'resultado' | 'ganador' | 'error-a
         text-align: center;
         line-height: 1.5;
       }
+      @media (max-width: 480px) {
+        .play-wrap { padding: 12px 8px 30px; }
+        .card { border-radius: 16px; }
+        .body { padding: 18px 14px 22px; }
+        .row2 { grid-template-columns: 1fr; }
+        .result-box { padding: 20px 14px; }
+        .amount-big { font-size: 44px; }
+        h1 { font-size: 18px; }
+      }
     `,
   ],
 })

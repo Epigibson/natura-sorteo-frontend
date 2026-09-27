@@ -111,6 +111,12 @@ import { ToastService, ToastType } from './toast.service';
       .close:hover {
         color: #374151;
       }
+      @media (max-width: 480px) {
+        .toast-stack { top: 10px; right: 10px; left: 10px; max-width: none; width: auto; }
+        .toast { padding: 12px; }
+        .title { font-size: 13px; }
+        .msg { font-size: 12px; }
+      }
     `,
   ],
 })

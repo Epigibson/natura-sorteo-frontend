@@ -136,6 +136,10 @@ import { ToastService } from '../../core/toast.service';
         font-size: 11px;
         color: #9ca3af;
       }
+      @media (max-width: 480px) {
+        .login-card { padding: 24px 18px; }
+        h1 { font-size: 20px; }
+      }
     `,
   ],
 })

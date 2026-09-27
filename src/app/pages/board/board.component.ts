@@ -476,16 +476,24 @@ interface BoardData {
       }
 
       @media (max-width: 480px) {
-        .top h1 {
-          font-size: 21px;
-        }
+        .board-page { padding: 16px 10px 40px; }
+        .top h1 { font-size: 19px; }
+        .sub { font-size: 12px; }
+        .mini-stats { gap: 6px; }
+        .ms { font-size: 10px; padding: 4px 10px; }
+        .legend { gap: 10px; }
+        .leg-item { font-size: 11px; }
         .grid {
-          grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
-          gap: 9px;
+          grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+          gap: 8px;
         }
-        .tile-folio {
-          font-size: 21px;
-        }
+        .tile { border-radius: 12px; padding: 8px 4px; }
+        .tile-folio { font-size: 18px; }
+        .tile-status { font-size: 8px; }
+        .tile-action { font-size: 7px; }
+        .dialog { padding: 22px 16px 18px; }
+        .d-icon { font-size: 28px; }
+        .dialog h3 { font-size: 17px; }
       }
     `,
   ],

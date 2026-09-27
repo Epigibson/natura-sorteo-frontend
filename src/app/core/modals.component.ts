@@ -181,6 +181,13 @@ import { ModalService } from './modal.service';
       .btn-solid.danger {
         background: linear-gradient(135deg, #b71c1c, #e53935);
       }
+      @media (max-width: 480px) {
+        .dialog { padding: 22px 16px 18px; }
+        .d-icon { font-size: 28px; }
+        h3 { font-size: 16px; }
+        .msg { font-size: 12.5px; margin-bottom: 14px; }
+        .actions { flex-direction: column-reverse; gap: 8px; }
+      }
     `,
   ],
 })

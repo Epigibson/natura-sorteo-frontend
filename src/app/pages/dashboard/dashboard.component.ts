@@ -168,6 +168,9 @@ import { Raffle } from '../../core/models';
         gap: 12px;
         margin-bottom: 24px;
       }
+      @media (max-width: 480px) {
+        .global-stats { grid-template-columns: repeat(2, 1fr); }
+      }
       .gs {
         background: #fff;
         border: 1.5px solid #e5e7eb;
@@ -190,8 +193,19 @@ import { Raffle } from '../../core/models';
       }
       .grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 16px;
+      }
+      @media (max-width: 640px) {
+        .page { padding: 16px 12px 40px; }
+        .top { flex-direction: column; align-items: stretch; }
+        .top-actions { flex-wrap: wrap; justify-content: flex-end; }
+        .user { width: 100%; text-align: right; margin-bottom: 4px; }
+        .global-stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .gs { padding: 12px 8px; }
+        .gs-n { font-size: 20px; }
+        h1 { font-size: 22px; }
+        .grid { grid-template-columns: 1fr; }
       }
       .card {
         background: #fff;

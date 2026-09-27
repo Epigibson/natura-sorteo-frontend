@@ -217,6 +217,22 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
         flex-wrap: wrap;
         margin: 14px 0 22px;
       }
+      @media (max-width: 640px) {
+        .page { padding: 16px 12px 60px; }
+        .head { flex-direction: column; }
+        .head-actions { flex-direction: column; width: 100%; }
+        .head-actions button { width: 100%; }
+        .stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .stat { padding: 10px 6px; }
+        .stat .n { font-size: 18px; }
+        .toolbar { flex-direction: column; align-items: stretch; }
+        .filters { flex-wrap: wrap; }
+        .ticket { grid-template-columns: 56px 1fr; gap: 8px; padding: 10px; }
+        .t-actions { grid-column: 1 / -1; justify-content: flex-end; flex-wrap: wrap; }
+        .bl-actions { flex-wrap: wrap; }
+        .modal { max-width: 100%; }
+        h1 { font-size: 20px; }
+      }
       .badge {
         font-size: 11px;
         font-weight: 800;

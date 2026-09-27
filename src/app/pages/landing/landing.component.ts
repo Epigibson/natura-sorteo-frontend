@@ -368,19 +368,21 @@ import { PublicRaffle } from '../../core/models';
       }
 
       @media (max-width: 480px) {
-        .hero h1 {
-          font-size: 24px;
-        }
-        .stats-row {
-          gap: 8px;
-        }
-        .stat {
-          min-width: 90px;
-          padding: 10px 12px;
-        }
-        .stat-n {
-          font-size: 16px;
-        }
+        .hero { padding: 36px 16px 44px; }
+        .hero h1 { font-size: 22px; }
+        .tagline { font-size: 13px; }
+        .prize-card { padding: 18px 14px; }
+        .prize-name { font-size: 17px; }
+        .stats-row { gap: 8px; }
+        .stat { min-width: 0; flex: 1; padding: 10px 8px; }
+        .stat-n { font-size: 15px; }
+        .stat-t { font-size: 9px; }
+        .how { padding: 32px 16px; }
+        .how h2 { font-size: 20px; }
+        .steps { grid-template-columns: 1fr; }
+        .access { padding: 36px 16px 44px; }
+        .row2 { grid-template-columns: 1fr; }
+        .access-card { padding: 20px 16px; }
       }
     `,
   ],

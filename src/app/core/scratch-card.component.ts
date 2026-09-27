@@ -126,6 +126,11 @@ import { CommonModule } from '@angular/common';
         font-weight: 700;
         font-size: 14px;
       }
+      @media (max-width: 480px) {
+        .scratch-wrap { width: 260px; height: 150px; }
+        .progress-wrap { width: 260px; }
+        .prize-side .amount { font-size: 44px; }
+      }
     `,
   ],
 })
