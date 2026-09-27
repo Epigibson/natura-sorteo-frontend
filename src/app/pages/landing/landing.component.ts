@@ -100,34 +100,22 @@ import { PublicRaffle } from '../../core/models';
         </div>
       </section>
 
-      <!-- ACCESO -->
-      <section class="access" id="access">
-        <h2>Ya tengo mi boleto</h2>
-        <p class="access-sub">Ingresa tu folio y código de acceso para continuar</p>
-        <div class="access-card">
-          <div class="row2">
-            <div>
-              <label>Folio</label>
-              <input type="number" [(ngModel)]="folio" placeholder="07" min="1" />
-            </div>
-            <div>
-              <label>Código de acceso</label>
-              <input [(ngModel)]="code" placeholder="A7K2" (keyup.enter)="goToPlay()" />
-            </div>
-          </div>
-          <button class="cta" (click)="goToPlay()">
-            Continuar al raspadito →
-          </button>
-          @if (error()) {
-            <div class="error">{{ error() }}</div>
-          }
-        </div>
-      </section>
+      
+
+      <!-- CTA FINAL -->
+      @if (!raffle()?.drawn) {
+        <section class="cta-section">
+          <h2>¿Listo para raspar tu suerte?</h2>
+          <p>Elige tu boleto y descubre cuánto pagas</p>
+          <button class="cta-big" (click)="goToBoard()">Ver boletos disponibles 🎟️</button>
+        </section>
+      }
 
       <!-- FOOTER -->
       <footer class="foot">
-        <p>Rifa privada · Solo con folio y código de acceso</p>
+        <div class="foot-brand">🎟️ Sorteo Natura</div>
         <p>Pagues \${{ raffle()?.price_min || 30 }} o \${{ raffle()?.price_max || 50 }}, tu probabilidad de ganar es la misma 🍀</p>
+        <p>Rifa privada entre conocidos</p>
       </footer>
     </div>
   `,
@@ -136,26 +124,52 @@ import { PublicRaffle } from '../../core/models';
       .landing {
         min-height: 100vh;
         background: #faf7f0;
+        overflow-x: hidden;
       }
 
       /* HERO */
       .hero {
-        background: linear-gradient(155deg, #0a2e0d 0%, #1b5e20 35%, #2e7d32 70%, #1b5e20 100%);
+        background: linear-gradient(160deg, #071a08 0%, #0d3b12 25%, #1b5e20 50%, #2e7d32 75%, #1b5e20 100%);
         color: #fff;
-        padding: 60px 20px 70px;
+        padding: 70px 20px 80px;
         text-align: center;
         position: relative;
         overflow: hidden;
       }
+      .hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(ellipse at 20% 50%, rgba(201,162,39,0.15) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 20%, rgba(76,175,80,0.15) 0%, transparent 50%),
+          radial-gradient(ellipse at 50% 100%, rgba(201,162,39,0.1) 0%, transparent 40%);
+        pointer-events: none;
+      }
+      .hero::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 80px;
+        background: linear-gradient(to top, #faf7f0, transparent);
+        pointer-events: none;
+      }
       .hero-glow {
         position: absolute;
-        top: -40%;
+        top: -30%;
         left: 50%;
         transform: translateX(-50%);
-        width: 500px;
-        height: 500px;
-        background: radial-gradient(circle, rgba(201,162,39,0.2) 0%, transparent 70%);
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(201,162,39,0.25) 0%, rgba(201,162,39,0.05) 40%, transparent 70%);
         pointer-events: none;
+        animation: pulse 4s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 0.7; transform: translateX(-50%) scale(1); }
+        50% { opacity: 1; transform: translateX(-50%) scale(1.05); }
       }
       .brand-badge {
         display: inline-block;
@@ -211,12 +225,29 @@ import { PublicRaffle } from '../../core/models';
         margin-bottom: 28px;
       }
       .prize-card {
-        background: rgba(255, 255, 255, 0.12);
-        backdrop-filter: blur(8px);
-        border: 1.5px solid rgba(255, 255, 255, 0.2);
-        border-radius: 20px;
-        padding: 24px 20px;
-        margin-bottom: 26px;
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 24px;
+        padding: 32px 24px;
+        margin-bottom: 30px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 16px 48px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+      }
+      .prize-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: conic-gradient(from 0deg, transparent, rgba(201,162,39,0.1), transparent 30%);
+        animation: shine 6s linear infinite;
+        pointer-events: none;
+      }
+      @keyframes shine {
+        to { transform: rotate(360deg); }
       }
       .prize-icon {
         font-size: 44px;
@@ -233,15 +264,22 @@ import { PublicRaffle } from '../../core/models';
       .stats-row {
         display: flex;
         justify-content: center;
-        gap: 12px;
-        margin-bottom: 28px;
+        gap: 14px;
+        margin-bottom: 32px;
         flex-wrap: wrap;
       }
       .stat {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 14px;
-        padding: 14px 18px;
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 18px;
+        padding: 18px 22px;
         min-width: 110px;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .stat:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
       }
       .stat-n {
         font-size: 20px;
@@ -254,22 +292,34 @@ import { PublicRaffle } from '../../core/models';
         letter-spacing: 0.5px;
         margin-top: 2px;
       }
-      .cta {
+      .cta, .cta-big {
         display: inline-block;
-        padding: 16px 40px;
+        padding: 18px 44px;
         border: none;
         border-radius: 999px;
-        background: linear-gradient(135deg, #c9a227, #f0c94e);
+        background: linear-gradient(135deg, #c9a227 0%, #f0c94e 50%, #c9a227 100%);
+        background-size: 200% 200%;
         color: #1b5e20;
-        font-size: 17px;
+        font-size: 18px;
         font-weight: 800;
         cursor: pointer;
-        box-shadow: 0 8px 28px rgba(201, 162, 39, 0.4);
+        box-shadow: 0 8px 32px rgba(201, 162, 39, 0.4), inset 0 1px 0 rgba(255,255,255,0.3);
         text-decoration: none;
-        transition: transform 0.15s;
+        transition: all 0.25s;
+        letter-spacing: 0.3px;
+        animation: btnShine 3s ease-in-out infinite;
       }
-      .cta:hover {
-        transform: translateY(-2px);
+      @keyframes btnShine {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+      }
+      .cta:hover, .cta-big:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 14px 40px rgba(201, 162, 39, 0.5), inset 0 1px 0 rgba(255,255,255,0.3);
+      }
+      .cta-big {
+        padding: 20px 52px;
+        font-size: 19px;
       }
       .fine {
         font-size: 12px;
@@ -303,11 +353,18 @@ import { PublicRaffle } from '../../core/models';
       }
       .step {
         background: #fff;
-        border: 1.5px solid #e5e7eb;
-        border-radius: 18px;
-        padding: 24px 18px;
+        border: 1px solid #e5e7eb;
+        border-radius: 20px;
+        padding: 28px 20px;
         text-align: center;
         position: relative;
+        transition: all 0.25s;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      }
+      .step:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+        border-color: #c8e6c9;
       }
       .step-num {
         position: absolute;
@@ -411,13 +468,46 @@ import { PublicRaffle } from '../../core/models';
       }
 
       /* FOOTER */
-      .foot {
-        background: #0d3b12;
-        color: rgba(255, 255, 255, 0.6);
+      .cta-section {
         text-align: center;
-        padding: 28px 20px;
+        padding: 60px 20px;
+        background: linear-gradient(135deg, #0d3b12, #1b5e20);
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+      }
+      .cta-section::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at 50% 0%, rgba(201,162,39,0.2) 0%, transparent 60%);
+        pointer-events: none;
+      }
+      .cta-section h2 {
+        font-size: 28px;
+        font-weight: 900;
+        margin: 0 0 8px;
+        position: relative;
+      }
+      .cta-section p {
+        opacity: 0.8;
+        margin: 0 0 28px;
+        position: relative;
+      }
+      .foot {
+        background: #071a08;
+        color: rgba(255, 255, 255, 0.5);
+        text-align: center;
+        padding: 36px 20px;
         font-size: 12px;
         line-height: 1.7;
+      }
+      .foot-brand {
+        font-size: 14px;
+        font-weight: 800;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 8px;
+        letter-spacing: 2px;
       }
 
       @media (max-width: 480px) {
