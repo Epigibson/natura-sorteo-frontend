@@ -22,10 +22,15 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
             <span class="badge" [class]="'badge-' + r.status">{{ statusLabel(r.status) }}</span>
             <h1>{{ r.title }}</h1>
             <p class="prize">🎁 {{ r.prize }} · valor \${{ r.prize_value }}</p>
-            <p class="link-pub">
-              Enlace del participante:
-              <code>/jugar/{{ r.slug }}</code>
-            </p>
+            <div class="board-link">
+              <span class="bl-label">🔗 Enlace del tablero:</span>
+              <code class="bl-url">{{ boardUrl() }}</code>
+              <div class="bl-actions">
+                <button class="btn-sm btn-copy" (click)="copyBoardLink()">📋 Copiar</button>
+                <button class="btn-sm btn-wa" (click)="shareBoardWhatsApp()">📲 WhatsApp</button>
+                <a class="btn-sm btn-open" [href]="boardUrl()" target="_blank">👁 Ver</a>
+              </div>
+            </div>
           </div>
           <div class="head-actions">
             @if (r.status === 'open') {
@@ -123,7 +128,9 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
                   {{ t.participant?.name || '— sin asignar —' }}
                 </div>
                 <div class="t-meta">
-                  <span class="code">{{ t.access_code }}</span>
+                  <span class="code-big" (click)="copyCode(t)" title="Clic para copiar">
+                    🔑 {{ t.access_code }} 📋
+                  </span>
                   @if (t.participant?.phone) {
                     <span class="tel">{{ t.participant?.phone }}</span>
                   }
@@ -243,6 +250,51 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
         border-radius: 6px;
         color: #1b5e20;
         font-weight: 700;
+      }
+      .board-link {
+        margin-top: 12px;
+        background: #fff;
+        border: 1.5px solid #c8e6c9;
+        border-radius: 14px;
+        padding: 14px 16px;
+      }
+      .bl-label {
+        font-size: 12px;
+        font-weight: 800;
+        color: #1b5e20;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        display: block;
+        margin-bottom: 6px;
+      }
+      .bl-url {
+        display: block;
+        background: #f3f4f6;
+        padding: 8px 12px;
+        border-radius: 8px;
+        color: #374151;
+        font-family: monospace;
+        font-size: 12.5px;
+        word-break: break-all;
+        margin-bottom: 10px;
+      }
+      .bl-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .btn-open {
+        display: inline-flex;
+        align-items: center;
+        padding: 7px 12px;
+        border-radius: 9px;
+        border: 1.5px solid #c8e6c9;
+        background: #fff;
+        color: #1b5e20;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
       }
       .head-actions {
         display: flex;
@@ -431,6 +483,25 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
         font-size: 12px;
         font-weight: 700;
         color: #374151;
+      }
+      .code-big {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-family: monospace;
+        background: #fff8e1;
+        border: 1.5px solid #ffe082;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 800;
+        color: #e65100;
+        cursor: pointer;
+        letter-spacing: 1px;
+        transition: background 0.15s;
+      }
+      .code-big:hover {
+        background: #ffecb3;
       }
       .tel {
         font-size: 12px;
@@ -809,6 +880,34 @@ export class RaffleDetailComponent implements OnInit {
           err?.error?.detail || 'No se pudo generar el archivo',
         );
       },
+    });
+  }
+
+  boardUrl(): string {
+    return location.origin + '/sorteo/' + (this.raffle()?.slug || '') + '/tablero';
+  }
+
+  copyBoardLink() {
+    navigator.clipboard.writeText(this.boardUrl()).then(() => {
+      this.toast.success('Enlace copiado', 'Compartelo con tus participantes');
+    });
+  }
+
+  shareBoardWhatsApp() {
+    const r = this.raffle();
+    const msg =
+      '\u{1F39F}\uFE0F ' + (r?.title || 'Sorteo Natura') + '\n\n' +
+      '\u{1F381} Premio: ' + (r?.prize || '') + '\n' +
+      '\u{1F4B0} Tu precio lo descubres al raspar: $' + (r?.price_min || 30) + ' a $' + (r?.price_max || 50) + '\n\n' +
+      'Elige tu boleto aqui \u{1F447}\n' + this.boardUrl() + '\n\n' +
+      '\u{1F340} Suerte!';
+    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+    this.toast.info('WhatsApp abierto', 'Elige el contacto o grupo');
+  }
+
+  copyCode(t: Ticket) {
+    navigator.clipboard.writeText(t.access_code).then(() => {
+      this.toast.success('Código copiado', 'Folio ' + t.folio + ': ' + t.access_code);
     });
   }
 }
