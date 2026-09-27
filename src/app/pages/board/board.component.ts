@@ -156,10 +156,10 @@ interface BoardData {
               Este boleto cuesta entre <strong>\${{ data()?.price_min }}</strong> y
               <strong>\${{ data()?.price_max }}</strong>. Regístrate para asegurarlo y poder rasparlo.
             </p>
-            <label>Nombre completo</label>
-            <input [(ngModel)]="regName" placeholder="Ana García López" autocomplete="name" />
-            <label>Número de WhatsApp / celular</label>
-            <input [(ngModel)]="regPhone" placeholder="55 1234 5678" type="tel" maxlength="15" />
+            <label class="field-label">Nombre completo</label>
+            <input class="field-input" [(ngModel)]="regName" placeholder="Ana García López" autocomplete="name" />
+            <label class="field-label">Número de WhatsApp / celular</label>
+            <input class="field-input" [(ngModel)]="regPhone" placeholder="55 1234 5678" type="tel" maxlength="15" />
             <p class="msg" style="font-size:11px; margin-top:8px; margin-bottom:0;">
               Reclama todos tus boletos primero, luego raspa.
             </p>
@@ -570,57 +570,90 @@ interface BoardData {
         padding: 18px;
       }
       .dialog {
-        background: #0d1a2e;
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 22px;
-        padding: 28px 26px 24px;
+        background: linear-gradient(165deg, #0f2137 0%, #0d1a2e 100%);
+        border: 1px solid rgba(76,175,80,0.15);
+        border-radius: 24px;
+        padding: 32px 28px 28px;
         width: 100%;
-        max-width: 400px;
-        box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+        max-width: 420px;
+        box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+        position: relative;
+        overflow: hidden;
+      }
+      .dialog::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #43a047, #c9a227, #43a047);
       }
       .d-icon {
-        font-size: 36px;
+        font-size: 42px;
         text-align: center;
-        margin-bottom: 8px;
+        margin-bottom: 10px;
       }
       .dialog h3 {
         text-align: center;
-        margin: 0 0 8px;
-        font-size: 20px;
+        margin: 0 0 6px;
+        font-size: 22px;
+        font-weight: 900;
         color: #fff;
       }
       .msg {
         text-align: center;
         color: rgba(255,255,255,0.5);
-        font-size: 13.5px;
-        line-height: 1.55;
-        margin-bottom: 18px;
+        font-size: 13px;
+        line-height: 1.6;
+        margin-bottom: 20px;
       }
+      .msg strong {
+        color: #81c784;
+      }
+      .msg.legal {
+        font-size: 11px;
+        margin-top: 10px;
+        margin-bottom: 0;
+        padding: 10px;
+        background: rgba(255,255,255,0.03);
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.05);
+      }
+      .dialog label,
       .field-label {
         display: block;
         font-size: 11px;
-        font-weight: 700;
+        font-weight: 800;
         color: #81c784;
         text-transform: uppercase;
-        letter-spacing: 0.4px;
-        margin-bottom: 6px;
+        letter-spacing: 0.8px;
+        margin: 14px 0 7px;
       }
+      .dialog input,
       .field-input {
         width: 100%;
-        padding: 13px 14px;
-        border: 2px solid rgba(76,175,80,0.25);
-        border-radius: 12px;
-        font-size: 18px;
-        font-weight: 700;
-        text-align: center;
-        letter-spacing: 3px;
+        padding: 14px 16px;
+        border: 2px solid rgba(76,175,80,0.2);
+        border-radius: 14px;
+        font-size: 16px;
+        font-weight: 600;
         outline: none;
         box-sizing: border-box;
-        background: rgba(255,255,255,0.05);
+        background: rgba(255,255,255,0.06);
         color: #fff;
+        transition: all 0.2s;
+        font-family: inherit;
       }
+      .dialog input::placeholder,
+      .field-input::placeholder {
+        color: rgba(255,255,255,0.25);
+        font-weight: 400;
+      }
+      .dialog input:focus,
       .field-input:focus {
         border-color: #4caf50;
+        background: rgba(255,255,255,0.1);
         box-shadow: 0 0 0 4px rgba(76,175,80,0.15);
       }
       .actions {
@@ -630,35 +663,52 @@ interface BoardData {
       }
       .btn-ghost {
         flex: 1;
-        padding: 13px;
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.15);
-        background: transparent;
+        padding: 14px 18px;
+        border-radius: 14px;
+        border: 1.5px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.04);
         color: rgba(255,255,255,0.6);
         font-weight: 700;
         font-size: 14px;
         cursor: pointer;
         font-family: inherit;
+        transition: all 0.2s;
+      }
+      .btn-ghost:hover {
+        background: rgba(255,255,255,0.08);
+        border-color: rgba(255,255,255,0.2);
+        color: rgba(255,255,255,0.8);
       }
       .btn-solid {
-        flex: 1;
-        padding: 13px;
-        border-radius: 12px;
+        flex: 1.3;
+        padding: 14px 18px;
+        border-radius: 14px;
         border: none;
-        background: linear-gradient(135deg, #1b5e20, #43a047);
+        background: linear-gradient(135deg, #2e7d32, #43a047);
         color: #fff;
-        font-weight: 700;
-        font-size: 14px;
+        font-weight: 800;
+        font-size: 15px;
         cursor: pointer;
         font-family: inherit;
+        box-shadow: 0 6px 20px rgba(67,160,71,0.35);
+        transition: all 0.2s;
+      }
+      .btn-solid:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(67,160,71,0.45);
+      }
+      .btn-solid:disabled {
+        opacity: 0.5;
+        transform: none;
+        cursor: not-allowed;
       }
       .error {
-        margin-top: 12px;
-        padding: 10px;
-        background: rgba(198,40,40,0.15);
-        border: 1px solid rgba(198,40,40,0.25);
+        margin-top: 14px;
+        padding: 12px 14px;
+        background: rgba(198,40,40,0.12);
+        border: 1px solid rgba(198,40,40,0.2);
         color: #ef9a9a;
-        border-radius: 9px;
+        border-radius: 12px;
         font-size: 13px;
         font-weight: 600;
         text-align: center;
