@@ -99,7 +99,7 @@ interface BoardData {
         </div>
       } @else {
         <!-- BOTÓN RASPABR BOLETOS -->
-        @if (claimedFolios.size > 0 && !loading()) {
+        @if (claimedFolios.size > 0 && scratchedResults().length === 0 && !loading()) {
           <div class="scratch-cta">
             <div class="sc-info">Tienes <strong>{{ claimedFolios.size }}</strong> boleto(s) listo(s) para raspar</div>
             <button class="btn-scratch-all" (click)="goScratchMode()">👆 Raspar {{ claimedFolios.size > 1 ? 'mis boletos' : 'mi boleto' }}</button>
@@ -709,6 +709,7 @@ export class BoardComponent implements OnInit {
     localStorage.setItem('sn_claimed', JSON.stringify({
       folios: Array.from(this.claimedFolios),
       codes: this.claimedCodes,
+      scratched: this.scratchedResults(),
     }));
   }
 
@@ -719,6 +720,11 @@ export class BoardComponent implements OnInit {
         const d = JSON.parse(raw);
         this.claimedFolios = new Set(d.folios || []);
         this.claimedCodes = d.codes || {};
+        this.scratchedResults.set(d.scratched || []);
+        // Si ya raspó al menos uno, marcar allScratched
+        if ((d.scratched || []).length > 0 && (d.scratched || []).length >= (d.folios || []).length) {
+          this.allScratched.set(true);
+        }
       }
     } catch {}
   }
@@ -827,9 +833,10 @@ export class BoardComponent implements OnInit {
   toggleCard(card: BoardCard) {
     if (this.claimedFolios.has(card.folio)) {
       // No permitir deseleccionar si ya fue raspado
-      const alreadyScratched = this.scratchedResults().some(r => r.folio === card.folio);
-      if (alreadyScratched || this.scratchMode()) {
-        this.toast.info('Ya raspado', 'El folio ' + this.pad(card.folio) + ' ya fue raspado, no se puede quitar');
+      const anyScratched = this.scratchedResults().length > 0;
+      const thisScratched = this.scratchedResults().some(r => r.folio === card.folio);
+      if (thisScratched || anyScratched || this.scratchMode()) {
+        this.toast.info('Ya empezaste a raspar', 'Ya no puedes cambiar tu selección');
         return;
       }
       this.deselectTicket(card);  // Toggle OFF
@@ -877,6 +884,7 @@ export class BoardComponent implements OnInit {
       this.api.scratch({ folio: result.folio, code, raffle_slug: this.slug }).subscribe({
         next: (res) => {
           this.amountMap[result.folio] = res.amount;
+          this.saveClaimedState();
           const realResult = { folio: result.folio, amount: res.amount };
           const results = [...this.scratchedResults().filter(r => r.folio !== result.folio), realResult];
           this.scratchedResults.set(results);
