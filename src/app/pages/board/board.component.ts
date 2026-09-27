@@ -232,31 +232,32 @@ interface BoardData {
       }
 
       .winner-banner {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        background: linear-gradient(135deg, #fff8e1, #ffecb3);
-        border: 2px solid #ffe082;
-        border-radius: 16px;
-        padding: 18px;
-        max-width: 480px;
-        margin: 0 auto 22px;
-      }
-      .wb-icon {
-        font-size: 36px;
-      }
-      .wb-title {
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: #8d6e00;
-        font-weight: 700;
-      }
-      .wb-text {
-        font-size: 18px;
-        font-weight: 800;
-        color: #5d4037;
-      }
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(255,215,0,0.1);
+      border: 1px solid rgba(255,215,0,0.25);
+      border-radius: 20px;
+      padding: 22px;
+      max-width: 480px;
+      margin: 0 auto 24px;
+      backdrop-filter: blur(16px);
+      position: relative;
+      z-index: 2;
+    }
+    .wb-icon { font-size: 36px; }
+    .wb-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #f0c94e;
+      font-weight: 800;
+    }
+    .wb-text {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+    }
 
       .legend {
         display: flex;
@@ -301,12 +302,14 @@ interface BoardData {
 
       /* GRID DE TARJETAS */
       .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
-        gap: 12px;
-        max-width: 680px;
-        margin: 0 auto;
-      }
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+      gap: 12px;
+      max-width: 700px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
       .tile {
         aspect-ratio: 1;
         border: none;
@@ -389,20 +392,18 @@ interface BoardData {
       }
       .tile-mine .tile-action { color: #1565c0; font-weight: 800; }
       .tile-winner {
-        background: linear-gradient(145deg, #fff9c4, #ffe082);
-        box-shadow: 0 4px 20px rgba(255, 193, 7, 0.5);
-        border: 2px solid #f9a825;
-      }
-      .tile-winner .tile-folio {
-        color: #e65100;
-      }
-      .tile-winner::after {
-        content: '🏆';
-        position: absolute;
-        top: 6px;
-        right: 8px;
-        font-size: 16px;
-      }
+      background: rgba(255,215,0,0.15);
+      border-color: rgba(255,215,0,0.4);
+      box-shadow: 0 8px 32px rgba(255,215,0,0.2);
+    }
+    .tile-winner .tile-folio { color: #ffd54f; }
+    .tile-winner::after {
+      content: '🏆';
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      font-size: 16px;
+    }
 
       .tile-folio {
         font-size: 26px;
@@ -546,52 +547,65 @@ interface BoardData {
       }
 
       .scratch-cta {
-        background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-        border: 2px solid #42a5f5;
-        border-radius: 18px;
-        padding: 20px;
-        text-align: center;
-        margin-bottom: 20px;
-        max-width: 480px;
-        margin-left: auto;
-        margin-right: auto;
-      }
-      .sc-info {
-        color: #0d47a1;
-        font-size: 15px;
-        margin-bottom: 14px;
-      }
-      .btn-scratch-all {
-        padding: 14px 36px;
-        border: none;
-        border-radius: 14px;
-        background: linear-gradient(135deg, #1565c0, #42a5f5);
-        color: #fff;
-        font-size: 16px;
-        font-weight: 800;
-        cursor: pointer;
-        box-shadow: 0 6px 20px rgba(21,101,192,0.35);
-        transition: all 0.15s;
-      }
-      .btn-scratch-all:hover { transform: translateY(-2px); }
+      background: rgba(33,150,243,0.1);
+      border: 1px solid rgba(33,150,243,0.25);
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 24px;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+      backdrop-filter: blur(16px);
+      position: relative;
+      z-index: 2;
+    }
+    .sc-info {
+      color: rgba(255,255,255,0.7);
+      font-size: 15px;
+      margin-bottom: 16px;
+    }
+    .sc-info strong {
+      color: #64b5f6;
+    }
+    .btn-scratch-all {
+      padding: 16px 40px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #1565c0, #42a5f5);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 28px rgba(21,101,192,0.35);
+      transition: all 0.25s;
+      font-family: inherit;
+    }
+    .btn-scratch-all:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 36px rgba(21,101,192,0.45);
+    }
 
       .scratch-screen {
-        max-width: 600px;
-        margin: 0 auto;
-      }
-      .ss-header {
-        text-align: center;
-        color: #fff;
-        margin-bottom: 24px;
-      }
-      .ss-header h2 {
-        font-size: 22px;
-        margin: 0 0 6px;
-      }
-      .ss-header p {
-        opacity: 0.8;
-        font-size: 13px;
-      }
+      max-width: 600px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+    .ss-header {
+      text-align: center;
+      color: #fff;
+      margin-bottom: 28px;
+    }
+    .ss-header h2 {
+      font-size: 26px;
+      margin: 0 0 8px;
+      font-weight: 900;
+    }
+    .ss-header p {
+      color: rgba(255,255,255,0.5);
+      font-size: 14px;
+    }
       .ss-cards {
         display: flex;
         flex-direction: column;
@@ -638,18 +652,24 @@ interface BoardData {
         color: #ffe082;
       }
       .btn-wa-big {
-        width: 100%;
-        padding: 16px;
-        border: none;
-        border-radius: 14px;
-        background: #25d366;
-        color: #fff;
-        font-size: 16px;
-        font-weight: 800;
-        cursor: pointer;
-        margin-top: 16px;
-        box-shadow: 0 6px 20px rgba(37,211,102,0.35);
-      }
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #128c4a, #25d366);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 20px;
+      box-shadow: 0 8px 28px rgba(37,211,102,0.3);
+      transition: all 0.25s;
+      font-family: inherit;
+    }
+    .btn-wa-big:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 36px rgba(37,211,102,0.4);
+    }
       .btn-back {
         display: block;
         width: 100%;
@@ -665,11 +685,13 @@ interface BoardData {
       }
 
       .foot {
-        text-align: center;
-        color: rgba(255, 255, 255, 0.55);
-        font-size: 12px;
-        margin-top: 36px;
-      }
+      text-align: center;
+      color: rgba(255,255,255,0.3);
+      font-size: 12px;
+      margin-top: 40px;
+      position: relative;
+      z-index: 2;
+    }
 
       @media (max-width: 480px) {
         .board-page { padding: 16px 10px 40px; }
