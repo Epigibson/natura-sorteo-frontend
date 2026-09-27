@@ -136,7 +136,10 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     </section>
 
     <!-- HOW IT WORKS -->
-    <section class="section">
+    <section class="section section-how">
+      <div class="how-bg">
+        <div class="orb orb-5"></div>
+      </div>
       <div class="section-header">
         <div class="sh-badge">¿CÓMO FUNCIONA?</div>
         <h2 class="sh-title">Tres pasos y estás dentro</h2>
@@ -151,24 +154,31 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
           </div>
           <h3>Elige tu boleto</h3>
           <p>Entra al tablero y selecciona los boletos que quieras. Cada uno esconde un precio diferente.</p>
+          <div class="step-glow"></div>
         </div>
 
         <div class="step-connector">
           <div class="sc-line"></div>
           <div class="sc-dot"></div>
+          <div class="sc-dot"></div>
+          <div class="sc-dot"></div>
         </div>
 
-        <div class="step-card">
+        <div class="step-card step-featured">
+          <div class="step-badge">MÁS POPULAR</div>
           <div class="step-num">02</div>
-          <div class="step-icon-wrap">
+          <div class="step-icon-wrap step-icon-gold">
             <div class="step-icon">✨</div>
           </div>
           <h3>Raspa y descubre</h3>
           <p>Desliza el dedo sobre el raspadito digital y descubre cuánto cuesta tu boleto.</p>
+          <div class="step-glow"></div>
         </div>
 
         <div class="step-connector">
           <div class="sc-line"></div>
+          <div class="sc-dot"></div>
+          <div class="sc-dot"></div>
           <div class="sc-dot"></div>
         </div>
 
@@ -179,6 +189,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
           </div>
           <h3>Paga y participa</h3>
           <p>Realiza tu pago y entras al sorteo del premio. ¡Todos tienen la misma probabilidad!</p>
+          <div class="step-glow"></div>
         </div>
       </div>
     </section>
@@ -191,25 +202,62 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       </div>
 
       <div class="features-grid">
-        <div class="feature-card">
-          <div class="fc-icon">🎲</div>
+        <div class="feature-card fc-glow">
+          <div class="fc-icon-wrap fc-gold">
+            <div class="fc-icon">🎲</div>
+          </div>
           <h4>El precio lo eliges tú</h4>
           <p>Cada boleto tiene un precio entre \${{ raffle()?.price_min }} y \${{ raffle()?.price_max }}. Lo descubres al raspar.</p>
+          <div class="fc-shine"></div>
         </div>
-        <div class="feature-card">
-          <div class="fc-icon">⚖️</div>
+        <div class="feature-card fc-glow">
+          <div class="fc-icon-wrap fc-green">
+            <div class="fc-icon">⚖️</div>
+          </div>
           <h4>Misma probabilidad</h4>
           <p>Pagues $30 o $50, todos tienen la misma oportunidad de ganar el premio.</p>
+          <div class="fc-shine"></div>
         </div>
-        <div class="feature-card">
-          <div class="fc-icon">🔒</div>
+        <div class="feature-card fc-glow">
+          <div class="fc-icon-wrap fc-blue">
+            <div class="fc-icon">🔒</div>
+          </div>
           <h4>100% transparente</h4>
           <p>Sorteo en vivo y resultado registrado. Todo verificable y sin trucos.</p>
+          <div class="fc-shine"></div>
         </div>
-        <div class="feature-card">
-          <div class="fc-icon">⚡</div>
+        <div class="feature-card fc-glow">
+          <div class="fc-icon-wrap fc-purple">
+            <div class="fc-icon">⚡</div>
+          </div>
           <h4>Rápido y fácil</h4>
           <p>Elige, raspa y paga en minutos. Todo desde tu celular.</p>
+          <div class="fc-shine"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS BAR -->
+    <section class="stats-bar">
+      <div class="sb-inner">
+        <div class="sb-item">
+          <div class="sb-n">21</div>
+          <div class="sb-t">Boletos disponibles</div>
+        </div>
+        <div class="sb-divider"></div>
+        <div class="sb-item">
+          <div class="sb-n">\${{ raffle()?.price_min }}–\${{ raffle()?.price_max }}</div>
+          <div class="sb-t">Precio al raspar</div>
+        </div>
+        <div class="sb-divider"></div>
+        <div class="sb-item">
+          <div class="sb-n">1</div>
+          <div class="sb-t">Gran premio</div>
+        </div>
+        <div class="sb-divider"></div>
+        <div class="sb-item">
+          <div class="sb-n">∞</div>
+          <div class="sb-t">Diversión</div>
         </div>
       </div>
     </section>
@@ -218,26 +266,43 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     <section class="cta-section">
       <div class="cta-bg">
         <div class="orb orb-4"></div>
+        <div class="grid-overlay"></div>
       </div>
       <div class="cta-content">
         @if (!raffle()?.drawn) {
+          <div class="sh-badge sh-badge-gold">ÚLTIMA OPORTUNIDAD</div>
           <h2>¿Listo para raspar tu suerte?</h2>
-          <p>Los boletos son limitados. Elige el tuyo ahora.</p>
+          <p>Los boletos son limitados. Elige el tuyo ahora y participa por el premio.</p>
           <button class="cta-main cta-large" (click)="goToBoard()">
             <span class="cta-text">Ver boletos disponibles</span>
             <span class="cta-arrow">→</span>
           </button>
+          <div class="cta-guarantee">
+            <span>🔒 Compra segura</span>
+            <span>⚡ Instantáneo</span>
+            <span>🏆 100% transparente</span>
+          </div>
         } @else {
-          <h2>¡Sorteo realizado!</h2>
-          <p>Gracias a todos los que participaron.</p>
+          <div class="sh-badge sh-badge-gold">SORTEO REALIZADO</div>
+          <h2>¡Gracias por participar!</h2>
+          <p>El premio ya tiene dueño. ¡Hasta la próxima!</p>
         }
       </div>
     </section>
 
     <!-- FOOTER -->
     <footer class="footer">
-      <div class="footer-brand">🎟️ SORTEO NATURA</div>
-      <p>Rifa privada entre conocidos · Todos los derechos reservados</p>
+      <div class="footer-inner">
+        <div class="footer-brand">🎟️ SORTEO NATURA</div>
+        <div class="footer-links">
+          <span>Sorteo privado</span>
+          <span class="footer-dot">·</span>
+          <span>Entre conocidos</span>
+          <span class="footer-dot">·</span>
+          <span>100% transparente</span>
+        </div>
+        <p class="footer-copy">Todos los derechos reservados</p>
+      </div>
     </footer>
   `,
   styles: [`
@@ -629,11 +694,24 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       max-width: 1100px;
       margin: 0 auto;
     }
+    .section-how {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(180deg, #050a15 0%, #0d1a2e 50%, #0a1628 100%);
+      max-width: 100%;
+    }
     .section-dark {
       background: #0a1628;
       max-width: 100%;
       border-top: 1px solid rgba(255,255,255,0.05);
       border-bottom: 1px solid rgba(255,255,255,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+    .orb-5 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(27,94,32,0.15), transparent 70%);
+      top: -30%; left: 20%;
     }
 
     .section-header {
@@ -677,72 +755,117 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       justify-content: center;
     }
     .step-card {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 20px;
-      padding: 32px 24px;
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 22px;
+      padding: 36px 24px;
       text-align: center;
       flex: 1;
       max-width: 280px;
       position: relative;
-      transition: all 0.3s;
+      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      overflow: hidden;
     }
     .step-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 16px 48px rgba(0,0,0,0.08);
-      border-color: #c8e6c9;
+      transform: translateY(-10px) scale(1.02);
+      border-color: rgba(201,162,39,0.3);
+      box-shadow: 0 24px 64px rgba(201,162,39,0.15);
+    }
+    .step-featured {
+      border-color: rgba(201,162,39,0.3);
+      background: rgba(201,162,39,0.05);
+    }
+    .step-badge {
+      position: absolute;
+      top: -1px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #c9a227, #f0c94e);
+      color: #1a1a2e;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      padding: 4px 16px;
+      border-radius: 0 0 10px 10px;
     }
     .step-num {
-      font-size: 48px;
+      font-size: 52px;
       font-weight: 900;
-      color: #f0f0f0;
+      color: rgba(255,255,255,0.04);
       line-height: 1;
-      margin-bottom: -10px;
+      margin-bottom: -12px;
     }
     .step-icon-wrap {
-      width: 64px;
-      height: 64px;
-      background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
-      border-radius: 18px;
+      width: 68px;
+      height: 68px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 16px auto;
+      margin: 18px auto;
+      transition: all 0.3s;
+    }
+    .step-card:hover .step-icon-wrap {
+      transform: scale(1.1) rotate(5deg);
+    }
+    .step-icon-gold {
+      background: rgba(201,162,39,0.15);
+      border-color: rgba(201,162,39,0.3);
     }
     .step-icon {
-      font-size: 28px;
+      font-size: 30px;
     }
     .step-card h3 {
       font-size: 17px;
       font-weight: 800;
-      color: #1a1a2e;
+      color: #fff;
       margin-bottom: 8px;
     }
     .step-card p {
-      font-size: 13.5px;
-      color: #6b7280;
-      line-height: 1.55;
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+      line-height: 1.6;
+    }
+    .step-glow {
+      position: absolute;
+      bottom: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 80px;
+      background: radial-gradient(ellipse, rgba(201,162,39,0.15), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .step-card:hover .step-glow {
+      opacity: 1;
     }
     .step-connector {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 0 8px;
+      gap: 6px;
+      padding: 0 12px;
     }
     .sc-line {
-      width: 32px;
+      width: 40px;
       height: 2px;
-      background: linear-gradient(90deg, #c8e6c9, #c9a227);
+      background: linear-gradient(90deg, transparent, rgba(201,162,39,0.5), transparent);
       border-radius: 2px;
     }
     .sc-dot {
-      width: 8px;
-      height: 8px;
-      background: #c9a227;
+      width: 5px;
+      height: 5px;
+      background: rgba(201,162,39,0.5);
       border-radius: 50%;
-      margin-top: 4px;
     }
+    .sc-dot:nth-child(2) { opacity: 0.7; }
+    .sc-dot:nth-child(3) { opacity: 0.4; }
+    .sc-dot:nth-child(4) { opacity: 0.2; }
 
     /* FEATURES */
     .features-grid {
@@ -753,20 +876,52 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       margin: 0 auto;
     }
     .feature-card {
-      background: rgba(255,255,255,0.04);
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(16px);
       border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 18px;
-      padding: 28px 22px;
-      transition: all 0.3s;
+      border-radius: 22px;
+      padding: 32px 24px;
+      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      position: relative;
+      overflow: hidden;
     }
     .feature-card:hover {
-      background: rgba(255,255,255,0.07);
-      border-color: rgba(201,162,39,0.2);
-      transform: translateY(-4px);
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(201,162,39,0.25);
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 48px rgba(201,162,39,0.1);
+    }
+    .fc-icon-wrap {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      transition: transform 0.3s;
+    }
+    .feature-card:hover .fc-icon-wrap {
+      transform: scale(1.1) rotate(-5deg);
+    }
+    .fc-gold {
+      background: rgba(201,162,39,0.15);
+      border: 1px solid rgba(201,162,39,0.2);
+    }
+    .fc-green {
+      background: rgba(76,175,80,0.15);
+      border: 1px solid rgba(76,175,80,0.2);
+    }
+    .fc-blue {
+      background: rgba(33,150,243,0.15);
+      border: 1px solid rgba(33,150,243,0.2);
+    }
+    .fc-purple {
+      background: rgba(156,39,176,0.15);
+      border: 1px solid rgba(156,39,176,0.2);
     }
     .fc-icon {
-      font-size: 32px;
-      margin-bottom: 14px;
+      font-size: 26px;
     }
     .feature-card h4 {
       color: #fff;
@@ -775,12 +930,72 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       margin-bottom: 8px;
     }
     .feature-card p {
-      color: rgba(255,255,255,0.5);
-      font-size: 13.5px;
-      line-height: 1.55;
+      color: rgba(255,255,255,0.45);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .fc-shine {
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+      transition: left 0.5s ease;
+      pointer-events: none;
+    }
+    .feature-card:hover .fc-shine {
+      left: 120%;
     }
 
     /* CTA SECTION */
+    .stats-bar {
+      background: linear-gradient(135deg, rgba(201,162,39,0.08), rgba(76,175,80,0.05));
+      border-top: 1px solid rgba(201,162,39,0.1);
+      border-bottom: 1px solid rgba(201,162,39,0.1);
+      padding: 36px 24px;
+    }
+    .sb-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .sb-item {
+      text-align: center;
+      min-width: 120px;
+    }
+    .sb-n {
+      font-size: 28px;
+      font-weight: 900;
+      color: #c9a227;
+    }
+    .sb-t {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+    .sb-divider {
+      width: 1px;
+      height: 36px;
+      background: rgba(255,255,255,0.08);
+    }
+    .cta-guarantee {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .cta-guarantee span {
+      font-size: 12px;
+      color: rgba(255,255,255,0.35);
+    }
     .cta-section {
       position: relative;
       padding: 80px 24px;
@@ -815,21 +1030,40 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
 
     /* FOOTER */
     .footer {
-      background: #050a15;
+      background: #030712;
       text-align: center;
-      padding: 32px 24px;
-      border-top: 1px solid rgba(255,255,255,0.05);
+      padding: 40px 24px;
+      border-top: 1px solid rgba(255,255,255,0.03);
+    }
+    .footer-inner {
+      max-width: 600px;
+      margin: 0 auto;
     }
     .footer-brand {
-      font-size: 13px;
-      letter-spacing: 3px;
-      color: rgba(255,255,255,0.6);
-      font-weight: 700;
-      margin-bottom: 8px;
+      font-size: 15px;
+      letter-spacing: 4px;
+      color: rgba(255,255,255,0.7);
+      font-weight: 800;
+      margin-bottom: 12px;
     }
-    .footer p {
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .footer-links span {
       font-size: 12px;
-      color: rgba(255,255,255,0.25);
+      color: rgba(255,255,255,0.3);
+    }
+    .footer-dot {
+      color: rgba(201,162,39,0.4) !important;
+    }
+    .footer-copy {
+      font-size: 11px;
+      color: rgba(255,255,255,0.15);
     }
 
 
