@@ -766,7 +766,7 @@ export class BoardComponent implements OnInit {
 
   loadClaimedState() {
     try {
-      const raw = localStorage.getItem('sn_claimed');
+      const raw = localStorage.getItem('sn_claimed_' + this.slug);
       if (raw) {
         const d = JSON.parse(raw);
         this.claimedFolios = new Set(d.folios || []);
@@ -867,8 +867,8 @@ export class BoardComponent implements OnInit {
       return;
     }
     // Si ya está registrado, reclamar directo
-    const savedName = localStorage.getItem('sn_name');
-    const savedPhone = localStorage.getItem('sn_phone');
+    const savedName = localStorage.getItem('sn_name_' + this.slug);
+    const savedPhone = localStorage.getItem('sn_phone_' + this.slug);
     if (savedName && savedPhone) {
       this.regName = savedName;
       this.regPhone = savedPhone;
@@ -897,7 +897,7 @@ export class BoardComponent implements OnInit {
   }
 
   deselectTicket(card: BoardCard) {
-    const phone = localStorage.getItem('sn_phone') || '';
+    const phone = localStorage.getItem('sn_phone_' + this.slug) || '';
     if (!phone) return;
     this.api.releasePublicTicket(this.slug, { folio: card.folio, phone }).subscribe({
       next: () => {
@@ -955,8 +955,8 @@ export class BoardComponent implements OnInit {
 
   sendAllWhatsApp() {
     const results = this.scratchedResults();
-    const name = localStorage.getItem('sn_name') || '';
-    const phone = localStorage.getItem('sn_phone') || '';
+    const name = localStorage.getItem('sn_name_' + this.slug) || '';
+    const phone = localStorage.getItem('sn_phone_' + this.slug) || '';
     const r = this.data();
     let msg = '🎟️ REGISTRO — ' + (r?.title || 'Sorteo Natura') + '\n\n';
     msg += '👤 Nombre: ' + name + '\n';
@@ -1007,8 +1007,8 @@ export class BoardComponent implements OnInit {
         // Guardar localmente SIN recargar el tablero
         this.claimedCodes[sel.folio] = res.code;
         this.claimedFolios.add(sel.folio);
-        localStorage.setItem('sn_name', this.regName);
-        localStorage.setItem('sn_phone', this.regPhone);
+        localStorage.setItem('sn_name_' + this.slug, this.regName);
+        localStorage.setItem('sn_phone_' + this.slug, this.regPhone);
         // Actualizar el estado de la tarjeta localmente
         const updated = this.cards().map(card =>
           card.folio === sel.folio ? { ...card, status: 'registered' as any } : card
