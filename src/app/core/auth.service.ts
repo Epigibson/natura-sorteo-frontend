@@ -34,6 +34,11 @@ export class AuthService {
     );
   }
 
+  refreshToken() {
+    const refresh = localStorage.getItem('sn_refresh') || '';
+    return this.http.post<TokenOut>(`${API}/auth/refresh`, { refresh_token: refresh });
+  }
+
   logout() {
     localStorage.removeItem('sn_token');
     localStorage.removeItem('sn_refresh');
