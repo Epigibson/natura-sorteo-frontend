@@ -89,6 +89,15 @@ export class ApiService {
     });
   }
 
+  uploadImage(file: File): Observable<{ url: string; public_id: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<{ url: string; public_id: string }>(
+      `${API}/upload-image`,
+      formData,
+    );
+  }
+
   updateRaffle(id: string, body: any): Observable<any> {
     return this.http.patch<any>(`${API}/raffles/${id}`, body);
   }

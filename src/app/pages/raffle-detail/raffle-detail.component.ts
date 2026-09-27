@@ -1073,13 +1073,22 @@ export class RaffleDetailComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (!input.files || !input.files[0]) return;
     const file = input.files[0];
-    if (file.size > 2 * 1024 * 1024) {
-      this.toast.error('Imagen muy grande', 'Máximo 2 MB');
+    if (file.size > 5 * 1024 * 1024) {
+      this.toast.error('Imagen muy grande', 'Máximo 5 MB');
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => { this.editImageUrl = String(reader.result); };
-    reader.readAsDataURL(file);
+    this.editSaving.set(true);
+    this.api.uploadImage(file).subscribe({
+      next: (res) => {
+        this.editImageUrl = res.url;
+        this.editSaving.set(false);
+        this.toast.success('Foto subida', 'Imagen guardada en Cloudinary');
+      },
+      error: (err) => {
+        this.editSaving.set(false);
+        this.toast.error('Error al subir', err?.error?.detail || 'No se pudo subir la imagen');
+      },
+    });
   }
 
   saveEdit() {
