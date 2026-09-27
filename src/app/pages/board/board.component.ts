@@ -71,8 +71,8 @@ interface BoardData {
             @for (folio of getClaimedFoliosArray(); track folio) {
               <div class="ss-card-wrap">
                 <app-scratch-card
-                  [amount]="0"
-                  (revealed)="onTicketScratched({ folio: folio, amount: getAmountForFolio(folio) })"
+                  [amount]="amountMap[folio] || 0"
+                  (revealed)="onTicketScratched({ folio: folio, amount: amountMap[folio] || 0 })"
                 />
                 <div class="ss-folio-label">Folio {{ pad(folio) }}</div>
               </div>
@@ -130,7 +130,11 @@ interface BoardData {
                 <div class="tile-folio">{{ pad(card.folio) }}</div>
                 <div class="tile-status">{{ statusLabel(card) }}</div>
                 @if (claimedFolios.has(card.folio)) {
-                  <div class="tile-action">✅ Tuyo</div>
+                  @if (isScratched(card.folio)) {
+                    <div class="tile-action">🎰 Raspado</div>
+                  } @else {
+                    <div class="tile-action">✅ Tuyo</div>
+                  }
                 } @else if (card.status === 'free') {
                   <div class="tile-action">Toca para elegir</div>
                 }
@@ -717,6 +721,7 @@ export class BoardComponent implements OnInit {
     } catch {}
   }
   scratchedResults = signal<{ folio: number; amount: number }[]>([]);
+  amountMap: Record<number, number> = {};
   allScratched = signal(false);
   claiming = signal(false);
   error = signal('');
@@ -755,6 +760,10 @@ export class BoardComponent implements OnInit {
 
   getTotal(): number {
     return this.scratchedResults().reduce((a, r) => a + r.amount, 0);
+  }
+
+  isScratched(folio: number): boolean {
+    return this.scratchedResults().some(r => r.folio === folio);
   }
 
   pad(n: number): string {
@@ -815,6 +824,12 @@ export class BoardComponent implements OnInit {
 
   toggleCard(card: BoardCard) {
     if (this.claimedFolios.has(card.folio)) {
+      // No permitir deseleccionar si ya fue raspado
+      const alreadyScratched = this.scratchedResults().some(r => r.folio === card.folio);
+      if (alreadyScratched || this.scratchMode()) {
+        this.toast.info('Ya raspado', 'El folio ' + this.pad(card.folio) + ' ya fue raspado, no se puede quitar');
+        return;
+      }
       this.deselectTicket(card);  // Toggle OFF
     } else {
       this.selectCard(card);  // Toggle ON
@@ -859,6 +874,7 @@ export class BoardComponent implements OnInit {
     if (code) {
       this.api.scratch({ folio: result.folio, code, raffle_slug: this.slug }).subscribe({
         next: (res) => {
+          this.amountMap[result.folio] = res.amount;
           const realResult = { folio: result.folio, amount: res.amount };
           const results = [...this.scratchedResults().filter(r => r.folio !== result.folio), realResult];
           this.scratchedResults.set(results);
