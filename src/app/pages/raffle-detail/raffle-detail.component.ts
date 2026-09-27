@@ -171,32 +171,67 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
           }
         </div>
 
-        <!-- Modal editar sorteo -->
+        <!-- Modal editar sorteo PREMIUM -->
         @if (editOpen()) {
           <div class="overlay" (click)="editOpen.set(false)">
-            <div class="dialog dialog-edit" (click)="$event.stopPropagation()">
-              <h3>✏️ Editar sorteo</h3>
-              <div class="edit-grid">
-                <label>Título</label>
-                <input [(ngModel)]="editTitle" placeholder="Rifa Natura Febrero" />
-                <label>Premio</label>
-                <input [(ngModel)]="editPrize" placeholder="Set Krono K" />
-                <label>Valor del premio ($)</label>
-                <input type="number" [(ngModel)]="editPrizeValue" min="0" />
-                <label>Fecha del sorteo</label>
-                <input type="date" [(ngModel)]="editDrawDate" />
-                <label>Notas</label>
-                <textarea [(ngModel)]="editNotes" rows="2" placeholder="Notas internas…"></textarea>
-                <label>Foto del producto (máx 2 MB)</label>
-                <input type="file" accept="image/*" (change)="onPhotoChange($event)" />
-                @if (editImageUrl) {
-                  <img class="edit-preview" [src]="editImageUrl" alt="preview" />
-                }
+            <div class="edit-modal" (click)="$event.stopPropagation()">
+              <div class="edit-header">
+                <div class="edit-icon">✏️</div>
+                <h3>Editar sorteo</h3>
+                <p class="edit-sub">Actualiza los detalles de tu rifa</p>
               </div>
-              <div class="m-actions">
-                <button class="btn-ghost" (click)="editOpen.set(false)">Cancelar</button>
-                <button class="btn-solid" (click)="saveEdit()" [disabled]="editSaving()">
-                  {{ editSaving() ? 'Guardando…' : 'Guardar cambios' }}
+
+              <div class="edit-body">
+                <div class="field">
+                  <label>🏆 Título del sorteo</label>
+                  <input [(ngModel)]="editTitle" placeholder="Rifa Natura Febrero" />
+                </div>
+
+                <div class="field-row">
+                  <div class="field">
+                    <label>🎁 Premio</label>
+                    <input [(ngModel)]="editPrize" placeholder="Set Krono K" />
+                  </div>
+                  <div class="field field-sm">
+                    <label>💰 Valor ($)</label>
+                    <input type="number" [(ngModel)]="editPrizeValue" min="0" />
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label>📅 Fecha del sorteo</label>
+                  <input type="date" [(ngModel)]="editDrawDate" />
+                </div>
+
+                <div class="field">
+                  <label>📝 Notas</label>
+                  <textarea [(ngModel)]="editNotes" rows="2" placeholder="Notas internas…"></textarea>
+                </div>
+
+                <div class="field">
+                  <label>📸 Foto del producto</label>
+                  <label class="upload-zone" [class.has-image]="editImageUrl">
+                    @if (editImageUrl) {
+                      <img [src]="editImageUrl" class="upload-preview" alt="preview" />
+                      <span class="upload-text">Cambiar foto</span>
+                    } @else {
+                      <span class="upload-icon">📷</span>
+                      <span class="upload-text">Toca para subir una foto</span>
+                      <span class="upload-hint">JPG, PNG o WebP · máx 2 MB</span>
+                    }
+                    <input type="file" accept="image/*" (change)="onPhotoChange($event)" hidden />
+                  </label>
+                </div>
+              </div>
+
+              <div class="edit-footer">
+                <button class="btn-cancel" (click)="editOpen.set(false)">Cancelar</button>
+                <button class="btn-save" (click)="saveEdit()" [disabled]="editSaving()">
+                  @if (editSaving()) {
+                    <span class="spinner"></span> Guardando…
+                  } @else {
+                    ✅ Guardar cambios
+                  }
                 </button>
               </div>
             </div>
@@ -613,26 +648,80 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
         color: #6b7280;
       }
       .overlay {
-        position: fixed; inset: 0; background: rgba(15,23,42,0.52); backdrop-filter: blur(3px);
+        position: fixed; inset: 0; background: rgba(10,20,10,0.6); backdrop-filter: blur(6px);
         display: flex; align-items: center; justify-content: center; z-index: 9000; padding: 18px;
       }
-      .dialog-edit {
-        background: #faf7f0; border-radius: 20px; padding: 26px; width: 100%; max-width: 480px;
-        box-shadow: 0 24px 60px rgba(0,0,0,0.25); max-height: 90vh; overflow-y: auto;
+      .edit-modal {
+        background: #fff; border-radius: 24px; width: 100%; max-width: 520px;
+        box-shadow: 0 32px 80px rgba(0,0,0,0.3); overflow: hidden;
+        animation: editPop 0.25s cubic-bezier(0.21,1.02,0.73,1);
+        max-height: 92vh; display: flex; flex-direction: column;
       }
-      .dialog-edit h3 { margin: 0 0 16px; color: #1f2937; }
-      .edit-grid label {
-        display: block; font-size: 11px; font-weight: 700; color: #1b5e20;
-        text-transform: uppercase; letter-spacing: 0.4px; margin: 12px 0 5px;
+      @keyframes editPop {
+        from { opacity: 0; transform: scale(0.94) translateY(16px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
       }
-      .edit-grid input, .edit-grid textarea {
-        width: 100%; padding: 11px 12px; border: 2px solid #c8e6c9; border-radius: 11px;
-        font-size: 14px; outline: none; box-sizing: border-box; font-family: inherit;
+      .edit-header {
+        background: linear-gradient(135deg, #1b5e20, #2e7d32);
+        color: #fff; padding: 24px 28px 20px; text-align: center;
       }
-      .edit-preview {
-        max-width: 100%; max-height: 140px; border-radius: 12px; margin-top: 8px;
-        object-fit: cover; border: 2px solid #e5e7eb;
+      .edit-icon { font-size: 32px; margin-bottom: 6px; }
+      .edit-header h3 { margin: 0; font-size: 20px; font-weight: 800; }
+      .edit-sub { margin: 4px 0 0; font-size: 13px; opacity: 0.8; }
+      .edit-body { padding: 24px 28px 16px; overflow-y: auto; flex: 1; }
+      .field { margin-bottom: 16px; }
+      .field-row { display: grid; grid-template-columns: 1fr 120px; gap: 12px; }
+      .field label {
+        display: block; font-size: 12px; font-weight: 700; color: #374151;
+        margin-bottom: 6px;
       }
+      .field input, .field textarea {
+        width: 100%; padding: 12px 14px; border: 2px solid #e5e7eb; border-radius: 14px;
+        font-size: 15px; outline: none; box-sizing: border-box; font-family: inherit;
+        transition: border-color 0.2s, box-shadow 0.2s; background: #fafafa;
+      }
+      .field input:focus, .field textarea:focus {
+        border-color: #4caf50; background: #fff;
+        box-shadow: 0 0 0 4px rgba(76,175,80,0.12);
+      }
+      .upload-zone {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        border: 2.5px dashed #d1d5db; border-radius: 18px; padding: 28px 16px;
+        cursor: pointer; transition: all 0.2s; background: #fafafa; text-align: center;
+      }
+      .upload-zone:hover { border-color: #4caf50; background: #f0f9f1; }
+      .upload-zone.has-image { padding: 12px; border-style: solid; border-color: #c8e6c9; }
+      .upload-preview {
+        max-width: 100%; max-height: 160px; border-radius: 12px; object-fit: cover;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      }
+      .upload-icon { font-size: 36px; margin-bottom: 8px; }
+      .upload-text { font-size: 14px; font-weight: 700; color: #374151; margin-top: 6px; }
+      .upload-hint { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+      .edit-footer {
+        display: flex; gap: 12px; padding: 16px 28px 24px;
+        border-top: 1px solid #f3f4f6; background: #fafafa;
+      }
+      .btn-cancel {
+        flex: 1; padding: 14px; border-radius: 14px; border: 2px solid #e5e7eb;
+        background: #fff; color: #6b7280; font-weight: 700; font-size: 15px; cursor: pointer;
+        transition: all 0.15s;
+      }
+      .btn-cancel:hover { border-color: #d1d5db; background: #f3f4f6; }
+      .btn-save {
+        flex: 1.5; padding: 14px; border-radius: 14px; border: none;
+        background: linear-gradient(135deg, #1b5e20, #43a047);
+        color: #fff; font-weight: 800; font-size: 15px; cursor: pointer;
+        box-shadow: 0 6px 20px rgba(27,94,32,0.3);
+        transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px;
+      }
+      .btn-save:hover { filter: brightness(1.08); transform: translateY(-1px); }
+      .btn-save:disabled { opacity: 0.6; transform: none; cursor: not-allowed; }
+      .spinner {
+        width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
       .modal-bg {
         position: fixed;
         inset: 0;
