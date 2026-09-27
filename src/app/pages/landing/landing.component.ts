@@ -12,18 +12,28 @@ import { PublicRaffle } from '../../core/models';
   imports: [CommonModule, FormsModule],
   template: `
     <div class="landing">
-      <!-- HERO -->
+      <!-- HERO PREMIUM -->
       <section class="hero">
+        <div class="hero-glow"></div>
         <div class="hero-inner">
-          <div class="brand">🎟️ Sorteo Natura</div>
+          <div class="brand-badge">🎟️ SORTEO NATURA</div>
           @if (raffle(); as r) {
             <h1>{{ r.title }}</h1>
             <p class="tagline">Un premio increíble, un raspadito de emoción</p>
 
             <div class="prize-card">
-              <div class="prize-icon">🎁</div>
+              @if ($any(r).image_url) {
+                <img class="prize-photo" [src]="$any(r).image_url" [alt]="r.prize" />
+              } @else {
+                <div class="prize-icon">🎁</div>
+              }
               <div class="prize-name">{{ r.prize }}</div>
               <div class="prize-value">Valor: \${{ r.prize_value }} MXN</div>
+              @if (r.draw_date) {
+                <div class="draw-date">
+                  📅 Sorteo: <strong>{{ formatDate(r.draw_date) }}</strong>
+                </div>
+              }
             </div>
 
             <div class="stats-row">
@@ -130,11 +140,54 @@ import { PublicRaffle } from '../../core/models';
 
       /* HERO */
       .hero {
-        background: linear-gradient(155deg, #0d3b12 0%, #1b5e20 40%, #2e7d32 100%);
+        background: linear-gradient(155deg, #0a2e0d 0%, #1b5e20 35%, #2e7d32 70%, #1b5e20 100%);
         color: #fff;
-        padding: 52px 20px 60px;
+        padding: 60px 20px 70px;
         text-align: center;
+        position: relative;
+        overflow: hidden;
       }
+      .hero-glow {
+        position: absolute;
+        top: -40%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(201,162,39,0.2) 0%, transparent 70%);
+        pointer-events: none;
+      }
+      .brand-badge {
+        display: inline-block;
+        font-size: 11px;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.15);
+        padding: 6px 18px;
+        border-radius: 999px;
+        margin-bottom: 18px;
+      }
+      .prize-photo {
+        width: 140px;
+        height: 140px;
+        object-fit: cover;
+        border-radius: 18px;
+        border: 3px solid rgba(255,255,255,0.25);
+        margin-bottom: 12px;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+      }
+      .draw-date {
+        margin-top: 10px;
+        padding: 8px 16px;
+        background: rgba(201,162,39,0.2);
+        border: 1px solid rgba(201,162,39,0.3);
+        border-radius: 999px;
+        display: inline-block;
+        font-size: 13px;
+        color: #ffe082;
+      }
+      .draw-date strong { color: #fff; }
       .hero-inner {
         max-width: 560px;
         margin: 0 auto;
@@ -416,6 +469,14 @@ export class LandingComponent implements OnInit {
 
   scrollToAccess() {
     document.getElementById('access')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  formatDate(d: string): string {
+    if (!d) return '';
+    try {
+      const dt = new Date(d + 'T12:00:00');
+      return dt.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    } catch { return d; }
   }
 
   goToBoard() {

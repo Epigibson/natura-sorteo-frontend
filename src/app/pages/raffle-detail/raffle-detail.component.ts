@@ -171,6 +171,38 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
           }
         </div>
 
+        <!-- Modal editar sorteo -->
+        @if (editOpen()) {
+          <div class="overlay" (click)="editOpen.set(false)">
+            <div class="dialog dialog-edit" (click)="$event.stopPropagation()">
+              <h3>✏️ Editar sorteo</h3>
+              <div class="edit-grid">
+                <label>Título</label>
+                <input [(ngModel)]="editTitle" placeholder="Rifa Natura Febrero" />
+                <label>Premio</label>
+                <input [(ngModel)]="editPrize" placeholder="Set Krono K" />
+                <label>Valor del premio ($)</label>
+                <input type="number" [(ngModel)]="editPrizeValue" min="0" />
+                <label>Fecha del sorteo</label>
+                <input type="date" [(ngModel)]="editDrawDate" />
+                <label>Notas</label>
+                <textarea [(ngModel)]="editNotes" rows="2" placeholder="Notas internas…"></textarea>
+                <label>Foto del producto (máx 2 MB)</label>
+                <input type="file" accept="image/*" (change)="onPhotoChange($event)" />
+                @if (editImageUrl) {
+                  <img class="edit-preview" [src]="editImageUrl" alt="preview" />
+                }
+              </div>
+              <div class="m-actions">
+                <button class="btn-ghost" (click)="editOpen.set(false)">Cancelar</button>
+                <button class="btn-solid" (click)="saveEdit()" [disabled]="editSaving()">
+                  {{ editSaving() ? 'Guardando…' : 'Guardar cambios' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+
         <!-- Modal asignar -->
         @if (selected(); as sel) {
           <div class="modal-bg" (click)="selected.set(null)">
@@ -580,6 +612,27 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
         padding: 80px;
         color: #6b7280;
       }
+      .overlay {
+        position: fixed; inset: 0; background: rgba(15,23,42,0.52); backdrop-filter: blur(3px);
+        display: flex; align-items: center; justify-content: center; z-index: 9000; padding: 18px;
+      }
+      .dialog-edit {
+        background: #faf7f0; border-radius: 20px; padding: 26px; width: 100%; max-width: 480px;
+        box-shadow: 0 24px 60px rgba(0,0,0,0.25); max-height: 90vh; overflow-y: auto;
+      }
+      .dialog-edit h3 { margin: 0 0 16px; color: #1f2937; }
+      .edit-grid label {
+        display: block; font-size: 11px; font-weight: 700; color: #1b5e20;
+        text-transform: uppercase; letter-spacing: 0.4px; margin: 12px 0 5px;
+      }
+      .edit-grid input, .edit-grid textarea {
+        width: 100%; padding: 11px 12px; border: 2px solid #c8e6c9; border-radius: 11px;
+        font-size: 14px; outline: none; box-sizing: border-box; font-family: inherit;
+      }
+      .edit-preview {
+        max-width: 100%; max-height: 140px; border-radius: 12px; margin-top: 8px;
+        object-fit: cover; border: 2px solid #e5e7eb;
+      }
       .modal-bg {
         position: fixed;
         inset: 0;
@@ -909,21 +962,58 @@ export class RaffleDetailComponent implements OnInit {
   editRaffle() {
     const r = this.raffle();
     if (!r) return;
-    const prize = prompt('Premio:', r.prize);
-    if (prize === null) return;
-    const prizeValue = prompt('Valor del premio:', String(r.prize_value));
-    if (prizeValue === null) return;
-    const drawDate = prompt('Fecha del sorteo (YYYY-MM-DD, vacío = sin cambio):', r.draw_date || '');
+    this.editTitle = r.title;
+    this.editPrize = r.prize;
+    this.editPrizeValue = r.prize_value;
+    this.editDrawDate = r.draw_date || '';
+    this.editNotes = r.notes || '';
+    this.editImageUrl = (r as any).image_url || '';
+    this.editOpen.set(true);
+  }
 
-    const body: any = { prize: prize.trim(), prize_value: +prizeValue || r.prize_value };
-    if (drawDate !== null && drawDate.trim()) body.draw_date = drawDate.trim();
+  editOpen = signal(false);
+  editTitle = '';
+  editPrize = '';
+  editPrizeValue = 0;
+  editDrawDate = '';
+  editNotes = '';
+  editImageUrl = '';
+  editSaving = signal(false);
 
+  onPhotoChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    if (file.size > 2 * 1024 * 1024) {
+      this.toast.error('Imagen muy grande', 'Máximo 2 MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => { this.editImageUrl = String(reader.result); };
+    reader.readAsDataURL(file);
+  }
+
+  saveEdit() {
+    const body: any = {
+      title: this.editTitle,
+      prize: this.editPrize,
+      prize_value: this.editPrizeValue,
+      draw_date: this.editDrawDate || null,
+      notes: this.editNotes || null,
+      image_url: this.editImageUrl || null,
+    };
+    this.editSaving.set(true);
     this.api.updateRaffle(this.raffleId, body).subscribe({
       next: () => {
-        this.toast.success('Sorteo actualizado', 'Premio y fecha guardados');
+        this.editSaving.set(false);
+        this.editOpen.set(false);
+        this.toast.success('Sorteo actualizado', 'Todos los cambios guardados');
         this.reload();
       },
-      error: (err) => this.toast.error('Error', err?.error?.detail || 'No se pudo actualizar'),
+      error: (err) => {
+        this.editSaving.set(false);
+        this.toast.error('Error', err?.error?.detail || 'No se pudo actualizar');
+      },
     });
   }
 
