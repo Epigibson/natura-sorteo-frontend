@@ -782,6 +782,7 @@ export class BoardComponent implements OnInit {
     if (savedName && savedPhone) {
       this.regName = savedName;
       this.regPhone = savedPhone;
+      this.selected.set(c);  // ← CRITICAL: set selected before claim
       this.claimTicket();
       return;
     }
