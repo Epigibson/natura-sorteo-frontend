@@ -830,6 +830,158 @@ import { PublicRaffle } from '../../core/models';
       color: rgba(255,255,255,0.25);
     }
 
+
+    /* ===== ANIMACIONES GPU-ACCELERATED ===== */
+
+    /* Scroll reveal - fade in up */
+    .step-card, .feature-card {
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeUp 0.6s ease forwards;
+    }
+    .step-card:nth-child(1), .feature-card:nth-child(1) { animation-delay: 0.1s; }
+    .step-card:nth-child(3), .feature-card:nth-child(2) { animation-delay: 0.2s; }
+    .step-card:nth-child(5), .feature-card:nth-child(3) { animation-delay: 0.3s; }
+    .feature-card:nth-child(4) { animation-delay: 0.4s; }
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Hero content stagger */
+    .hero-badge {
+      opacity: 0;
+      animation: fadeDown 0.5s ease 0.1s forwards;
+    }
+    .hero-title {
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.2s forwards;
+    }
+    .hero-sub {
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.35s forwards;
+    }
+    .prize-card {
+      opacity: 0;
+      animation: fadeUp 0.7s ease 0.5s forwards;
+    }
+    .hero-stats {
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.65s forwards;
+    }
+    .countdown, .cta-main, .cta-note {
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.8s forwards;
+    }
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Floating particles */
+    .hero-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(2px 2px at 20% 30%, rgba(201,162,39,0.4), transparent),
+        radial-gradient(2px 2px at 40% 70%, rgba(255,255,255,0.2), transparent),
+        radial-gradient(1px 1px at 60% 20%, rgba(201,162,39,0.3), transparent),
+        radial-gradient(2px 2px at 80% 50%, rgba(255,255,255,0.15), transparent),
+        radial-gradient(1px 1px at 10% 80%, rgba(201,162,39,0.25), transparent),
+        radial-gradient(2px 2px at 70% 85%, rgba(255,255,255,0.2), transparent),
+        radial-gradient(1px 1px at 90% 15%, rgba(201,162,39,0.35), transparent),
+        radial-gradient(2px 2px at 50% 45%, rgba(255,255,255,0.12), transparent);
+      background-size: 100% 100%;
+      animation: particleFloat 12s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes particleFloat {
+      0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.6; }
+      50% { transform: translateY(-15px) rotate(1deg); opacity: 1; }
+    }
+
+    /* Magnetic hover on CTA */
+    .cta-main {
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-main::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.2) 50%, transparent 70%);
+      transform: translateX(-100%);
+      transition: transform 0.5s ease;
+    }
+    .cta-main:hover::before {
+      transform: translateX(100%);
+    }
+
+    /* Card hover glow */
+    .step-card::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 21px;
+      background: linear-gradient(135deg, rgba(201,162,39,0), rgba(201,162,39,0.3), rgba(201,162,39,0));
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: -1;
+    }
+    .step-card:hover::before {
+      opacity: 1;
+    }
+
+    /* Number count-up feel on stats */
+    .hs-n {
+      transition: transform 0.2s;
+    }
+    .hs:hover .hs-n {
+      transform: scale(1.1);
+    }
+
+    /* Prize card tilt on hover */
+    .prize-card {
+      transition: transform 0.3s ease;
+    }
+    .prize-card:hover {
+      transform: perspective(600px) rotateX(2deg) rotateY(-2deg);
+    }
+
+    /* Section header line reveal */
+    .section-header::after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, #c9a227, #4caf50);
+      margin: 16px auto 0;
+      border-radius: 3px;
+      animation: lineGrow 0.8s ease 0.3s forwards;
+      transform: scaleX(0);
+    }
+    @keyframes lineGrow {
+      to { transform: scaleX(1); }
+    }
+
+    /* Smooth pulse on countdown numbers */
+    .cd-n {
+      transition: transform 0.15s;
+    }
+    .cd-box:hover .cd-n {
+      transform: scale(1.15);
+    }
+
+    /* Badge glow */
+    .hero-badge {
+      box-shadow: 0 0 20px rgba(201,162,39,0.15);
+      animation: fadeDown 0.5s ease 0.1s forwards, badgeGlow 3s ease-in-out infinite 1s;
+    }
+    @keyframes badgeGlow {
+      0%, 100% { box-shadow: 0 0 20px rgba(201,162,39,0.15); }
+      50% { box-shadow: 0 0 30px rgba(201,162,39,0.3); }
+    }
+
     /* RESPONSIVE */
     @media (max-width: 768px) {
       .hero-content { padding: 16px 16px 48px; }
