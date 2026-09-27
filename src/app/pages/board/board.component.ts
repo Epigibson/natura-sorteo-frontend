@@ -756,7 +756,8 @@ export class BoardComponent implements OnInit {
   scratchMode = signal(false);
 
   saveClaimedState() {
-    localStorage.setItem('sn_claimed', JSON.stringify({
+    const key = 'sn_claimed_' + this.slug;
+    localStorage.setItem(key, JSON.stringify({
       folios: Array.from(this.claimedFolios),
       codes: this.claimedCodes,
       scratched: this.scratchedResults(),
@@ -793,8 +794,8 @@ export class BoardComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.loadClaimedState();
     this.slug = this.route.snapshot.paramMap.get('slug') || '';
+    this.loadClaimedState();
     this.api.getBoard(this.slug).subscribe({
       next: (d: any) => {
         this.data.set(d);
