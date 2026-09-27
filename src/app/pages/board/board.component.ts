@@ -114,7 +114,7 @@ interface BoardData {
             <label>Número de WhatsApp / celular</label>
             <input [(ngModel)]="regPhone" placeholder="55 1234 5678" type="tel" maxlength="15" />
             <p class="msg" style="font-size:11px; margin-top:8px; margin-bottom:0;">
-              Un teléfono = un boleto. No podrás elegir otro después.
+              Puedes comprar varios boletos si quieres.
             </p>
             <div class="actions">
               <button class="btn-ghost" (click)="selected.set(null)">Cancelar</button>
