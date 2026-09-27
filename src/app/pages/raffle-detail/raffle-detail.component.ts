@@ -34,6 +34,7 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
                 <button class="btn-sm btn-copy" (click)="editRaffle()">✏️ Editar</button>
                 <button class="btn-sm btn-open" (click)="exportBackup()">💾 Backup</button>
                 <button class="btn-sm btn-open" (click)="showQR()">📱 QR</button>
+                <button class="btn-sm btn-danger" (click)="deleteRaffle()">🗑️ Eliminar</button>
               </div>
             </div>
           </div>
@@ -1272,6 +1273,24 @@ export class RaffleDetailComponent implements OnInit {
   }
 
   qrOpen = signal(false);
+
+  async deleteRaffle() {
+    const ok = await this.modal.confirm({
+      title: '🗑️ Eliminar sorteo',
+      message: 'Se eliminará el sorteo y TODOS sus boletos. Esta acción no se puede deshacer.',
+      confirmLabel: 'Sí, eliminar todo',
+      cancelLabel: 'Cancelar',
+      variant: 'danger',
+    });
+    if (!ok) return;
+    this.api.deleteRaffle(this.raffleId).subscribe({
+      next: (res) => {
+        this.toast.success('Sorteo eliminado', `${res.deleted_raffle} — ${res.deleted_tickets} boletos borrados`);
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => this.toast.error('Error', err?.error?.detail || 'No se pudo eliminar'),
+    });
+  }
 
   showQR() {
     this.qrOpen.set(true);

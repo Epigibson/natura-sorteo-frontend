@@ -107,6 +107,12 @@ export class ApiService {
     return this.http.get<any>(`${API}/participants`);
   }
 
+  deleteRaffle(id: string): Observable<{ ok: boolean; deleted_raffle: string; deleted_tickets: number }> {
+    return this.http.delete<{ ok: boolean; deleted_raffle: string; deleted_tickets: number }>(
+      `${API}/raffles/${id}`,
+    );
+  }
+
   exportBackup(raffleId: string): Observable<Blob> {
     return this.http.get(`${API}/raffles/${raffleId}/export/backup`, {
       responseType: 'blob',
