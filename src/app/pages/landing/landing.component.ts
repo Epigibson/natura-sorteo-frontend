@@ -52,11 +52,40 @@ import { PublicRaffle } from '../../core/models';
             </div>
 
             @if (r.drawn) {
-              <div class="winner-banner">
-                🏆 Ganó el folio <strong>{{ r.winner_folio }}</strong>
-                — {{ r.winner_name || 'Ganador' }}
+              <!-- SORTEO REALIZADO -->
+              <div class="winner-hero">
+                <div class="winner-confetti">🎉🏆🎉</div>
+                <div class="winner-label">SORTEO REALIZADO</div>
+                <div class="winner-name-big">{{ r.winner_name || 'Ganador' }}</div>
+                <div class="winner-folio">Folio {{ r.winner_folio }}</div>
+                <div class="winner-prize">se ganó: {{ r.prize }}</div>
               </div>
             } @else {
+              <!-- CUENTA REGRESIVA -->
+              @if (r.draw_date) {
+                <div class="countdown">
+                  <div class="cd-label">⏰ El sorteo es en</div>
+                  <div class="cd-grid">
+                    <div class="cd-box">
+                      <div class="cd-n">{{ cdDays() }}</div>
+                      <div class="cd-t">días</div>
+                    </div>
+                    <div class="cd-box">
+                      <div class="cd-n">{{ cdHours() }}</div>
+                      <div class="cd-t">hrs</div>
+                    </div>
+                    <div class="cd-box">
+                      <div class="cd-n">{{ cdMins() }}</div>
+                      <div class="cd-t">min</div>
+                    </div>
+                    <div class="cd-box">
+                      <div class="cd-n">{{ cdSecs() }}</div>
+                      <div class="cd-t">seg</div>
+                    </div>
+                  </div>
+                  <div class="cd-date">📅 {{ formatDate(r.draw_date) }}</div>
+                </div>
+              }
               <button class="cta" (click)="goToBoard()">
                 Ver boletos disponibles 🎟️
               </button>
@@ -326,12 +355,70 @@ import { PublicRaffle } from '../../core/models';
         opacity: 0.7;
         margin-top: 14px;
       }
-      .winner-banner {
-        background: rgba(255, 255, 255, 0.15);
-        border: 1.5px solid rgba(255, 255, 255, 0.25);
+      .winner-hero {
+        background: linear-gradient(135deg, rgba(201,162,39,0.25), rgba(255,215,0,0.15));
+        border: 2px solid rgba(255,215,0,0.4);
+        border-radius: 24px;
+        padding: 32px 24px;
+        margin-bottom: 20px;
+        position: relative;
+        overflow: hidden;
+      }
+      .winner-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 50% 0%, rgba(255,215,0,0.2) 0%, transparent 60%);
+      }
+      .winner-confetti { font-size: 32px; position: relative; }
+      .winner-label {
+        font-size: 12px; letter-spacing: 4px; text-transform: uppercase;
+        color: #ffe082; font-weight: 800; margin: 8px 0; position: relative;
+      }
+      .winner-name-big {
+        font-size: 28px; font-weight: 900; color: #fff;
+        position: relative; text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      }
+      .winner-folio {
+        font-size: 16px; color: #ffe082; font-weight: 700; margin: 4px 0; position: relative;
+      }
+      .winner-prize {
+        font-size: 14px; color: rgba(255,255,255,0.8); margin-top: 8px; position: relative;
+      }
+
+      .countdown {
+        background: rgba(255,255,255,0.08);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 22px;
+        padding: 24px;
+        margin-bottom: 24px;
+      }
+      .cd-label {
+        font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+        color: #ffe082; font-weight: 800; margin-bottom: 14px;
+      }
+      .cd-grid {
+        display: flex; justify-content: center; gap: 12px; margin-bottom: 14px;
+      }
+      .cd-box {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.15);
         border-radius: 16px;
-        padding: 18px;
-        font-size: 16px;
+        padding: 12px 16px;
+        min-width: 64px;
+        text-align: center;
+      }
+      .cd-n {
+        font-size: 28px; font-weight: 900; color: #fff;
+        font-variant-numeric: tabular-nums;
+      }
+      .cd-t {
+        font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+        color: rgba(255,255,255,0.6); margin-top: 2px;
+      }
+      .cd-date {
+        font-size: 13px; color: rgba(255,255,255,0.7);
       }
 
       /* CÓMO FUNCIONA */
@@ -512,6 +599,10 @@ import { PublicRaffle } from '../../core/models';
 
       @media (max-width: 480px) {
         .hero { padding: 36px 16px 44px; }
+        .cd-grid { gap: 8px; }
+        .cd-box { min-width: 52px; padding: 10px 8px; }
+        .cd-n { font-size: 22px; }
+        .winner-name-big { font-size: 22px; }
         .hero h1 { font-size: 22px; }
         .tagline { font-size: 13px; }
         .prize-card { padding: 18px 14px; }
@@ -549,6 +640,9 @@ export class LandingComponent implements OnInit {
     this.api.publicRaffle(this.slug).subscribe({
       next: (r) => {
         this.raffle.set(r);
+        if (!r.drawn && r.draw_date) {
+          this.startCountdown(r.draw_date);
+        }
       },
       error: () => {
         this.error.set('Sorteo no encontrado');
@@ -559,6 +653,47 @@ export class LandingComponent implements OnInit {
 
   scrollToAccess() {
     document.getElementById('access')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  private cdInterval: any;
+  private cdTarget = 0;
+  cdDaysVal = signal('--');
+  cdHoursVal = signal('--');
+  cdMinsVal = signal('--');
+  cdSecsVal = signal('--');
+
+  cdDays() { return this.cdDaysVal(); }
+  cdHours() { return this.cdHoursVal(); }
+  cdMins() { return this.cdMinsVal(); }
+  cdSecs() { return this.cdSecsVal(); }
+
+  private startCountdown(dateStr: string) {
+    if (!dateStr) return;
+    const parts = dateStr.split('-');
+    this.cdTarget = new Date(+parts[0], +parts[1]-1, +parts[2], 12, 0, 0).getTime();
+    if (this.cdInterval) clearInterval(this.cdInterval);
+    const tick = () => {
+      const now = Date.now();
+      const diff = this.cdTarget - now;
+      if (diff <= 0) {
+        this.cdDaysVal.set('00');
+        this.cdHoursVal.set('00');
+        this.cdMinsVal.set('00');
+        this.cdSecsVal.set('00');
+        clearInterval(this.cdInterval);
+        return;
+      }
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      this.cdDaysVal.set(d < 10 ? '0'+d : String(d));
+      this.cdHoursVal.set(h < 10 ? '0'+h : String(h));
+      this.cdMinsVal.set(m < 10 ? '0'+m : String(m));
+      this.cdSecsVal.set(s < 10 ? '0'+s : String(s));
+    };
+    tick();
+    this.cdInterval = setInterval(tick, 1000);
   }
 
   formatDate(d: string): string {
