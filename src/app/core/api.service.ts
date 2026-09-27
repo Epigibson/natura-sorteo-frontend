@@ -135,6 +135,10 @@ export class ApiService {
     return this.http.get<any>(`${API}/public/raffles/${slug}/board`);
   }
 
+  releasePublicTicket(slug: string, body: { folio: number; phone: string }): Observable<any> {
+    return this.http.post<any>(`${API}/public/raffles/${slug}/release`, body);
+  }
+
   claimTicket(
     slug: string,
     body: { folio: number; name: string; phone: string },

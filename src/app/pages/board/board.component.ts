@@ -359,6 +359,28 @@ interface BoardData {
         border: 2px solid #42a5f5;
       }
       .tile-mine .tile-folio { color: #0d47a1; }
+      .tile-deselect {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: rgba(198,40,40,0.85);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 900;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 2;
+        line-height: 1;
+      }
+      .tile-deselect:hover {
+        background: #c62828;
+        transform: scale(1.15);
+      }
       .tile-mine .tile-action { color: #1565c0; font-weight: 800; }
       .tile-winner {
         background: linear-gradient(145deg, #fff9c4, #ffe082);
@@ -791,6 +813,24 @@ export class BoardComponent implements OnInit {
     this.error.set('');
   }
 
+  deselectTicket(card: BoardCard) {
+    const phone = localStorage.getItem('sn_phone') || '';
+    if (!phone) return;
+    this.api.releasePublicTicket(this.slug, { folio: card.folio, phone }).subscribe({
+      next: () => {
+        this.claimedFolios.delete(card.folio);
+        delete this.claimedCodes[card.folio];
+        this.saveClaimedState();
+        const updated = this.cards().map(c =>
+          c.folio === card.folio ? { ...c, status: 'free' as any } : c
+        );
+        this.cards.set(updated);
+        this.toast.info('Boleto liberado', 'Folio ' + this.pad(card.folio) + ' ya está disponible');
+      },
+      error: (err) => this.toast.error('Error', err?.error?.detail || 'No se pudo liberar'),
+    });
+  }
+
   goScratchMode() {
     if (this.claimedFolios.size === 0) {
       this.toast.warning('Sin boletos', 'Primero reclama al menos un boleto');
@@ -806,10 +846,25 @@ export class BoardComponent implements OnInit {
   }
 
   onTicketScratched(result: { folio: number; amount: number }) {
-    const results = [...this.scratchedResults(), result];
-    this.scratchedResults.set(results);
-    if (results.length >= this.claimedFolios.size) {
-      this.allScratched.set(true);
+    // Obtener el monto real del backend
+    const code = this.claimedCodes[result.folio];
+    if (code) {
+      this.api.scratch({ folio: result.folio, code, raffle_slug: this.slug }).subscribe({
+        next: (res) => {
+          const realResult = { folio: result.folio, amount: res.amount };
+          const results = [...this.scratchedResults().filter(r => r.folio !== result.folio), realResult];
+          this.scratchedResults.set(results);
+          if (results.length >= this.claimedFolios.size) {
+            this.allScratched.set(true);
+          }
+        },
+      });
+    } else {
+      const results = [...this.scratchedResults(), result];
+      this.scratchedResults.set(results);
+      if (results.length >= this.claimedFolios.size) {
+        this.allScratched.set(true);
+      }
     }
   }
 
