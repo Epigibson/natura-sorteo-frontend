@@ -125,7 +125,7 @@ interface BoardData {
                 [class.tile-paid]="card.status === 'paid'"
                 [class.tile-mine]="claimedFolios.has(card.folio)"
                 [class.tile-winner]="data()?.winner_folio === card.folio && data()?.drawn"
-                (click)="claimedFolios.has(card.folio) ? goScratchMode() : selectCard(card)"
+                (click)="toggleCard(card)"
               >
                 <div class="tile-folio">{{ pad(card.folio) }}</div>
                 <div class="tile-status">{{ statusLabel(card) }}</div>
@@ -811,6 +811,14 @@ export class BoardComponent implements OnInit {
     this.regName = '';
     this.regPhone = '';
     this.error.set('');
+  }
+
+  toggleCard(card: BoardCard) {
+    if (this.claimedFolios.has(card.folio)) {
+      this.deselectTicket(card);  // Toggle OFF
+    } else {
+      this.selectCard(card);  // Toggle ON
+    }
   }
 
   deselectTicket(card: BoardCard) {
