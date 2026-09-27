@@ -93,7 +93,9 @@ interface BoardData {
             </div>
           }
 
-          <button class="btn-back" (click)="exitScratchMode()">← Volver al tablero</button>
+          @if (scratchedResults().length === 0) {
+              <button class="btn-back" (click)="exitScratchMode()">← Volver al tablero</button>
+            }
         </div>
       } @else {
         <!-- BOTÓN RASPABR BOLETOS -->
