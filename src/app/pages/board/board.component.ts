@@ -99,7 +99,7 @@ interface BoardData {
         </div>
       }
 
-      <!-- MODAL: elegir código -->
+      <!-- MODAL: registro antes de asignar -->
       @if (selected(); as sel) {
         <div class="overlay" (click)="selected.set(null)">
           <div class="dialog" (click)="$event.stopPropagation()">
@@ -107,18 +107,20 @@ interface BoardData {
             <h3>Folio {{ pad(sel.folio) }}</h3>
             <p class="msg">
               Este boleto cuesta entre <strong>\${{ data()?.price_min }}</strong> y
-              <strong>\${{ data()?.price_max }}</strong>. Ingresa tu código para rasparlo.
+              <strong>\${{ data()?.price_max }}</strong>. Regístrate para asegurarlo y poder rasparlo.
             </p>
-            <label>Código de acceso</label>
-            <input
-              [(ngModel)]="code"
-              placeholder="A7K2"
-              (keyup.enter)="goToScratch()"
-              autocomplete="off"
-            />
+            <label>Nombre completo</label>
+            <input [(ngModel)]="regName" placeholder="Ana García López" autocomplete="name" />
+            <label>Número de WhatsApp / celular</label>
+            <input [(ngModel)]="regPhone" placeholder="55 1234 5678" type="tel" maxlength="15" />
+            <p class="msg" style="font-size:11px; margin-top:8px; margin-bottom:0;">
+              Un teléfono = un boleto. No podrás elegir otro después.
+            </p>
             <div class="actions">
               <button class="btn-ghost" (click)="selected.set(null)">Cancelar</button>
-              <button class="btn-solid" (click)="goToScratch()">Raspar 🎰</button>
+              <button class="btn-solid" (click)="claimTicket()" [disabled]="claiming()">
+                {{ claiming() ? 'Asignando…' : 'Quiero este 🎰' }}
+              </button>
             </div>
             @if (error()) {
               <div class="error">{{ error() }}</div>
@@ -493,7 +495,9 @@ export class BoardComponent implements OnInit {
   cards = signal<BoardCard[]>([]);
   loading = signal(true);
   selected = signal<BoardCard | null>(null);
-  code = '';
+  regName = '';
+  regPhone = '';
+  claiming = signal(false);
   error = signal('');
   slug = '';
 
@@ -538,35 +542,57 @@ export class BoardComponent implements OnInit {
 
   selectCard(c: BoardCard) {
     if (this.data()?.drawn) {
-      this.toast.info('Sorteo ya realizado', `El ganador fue el folio ${this.data()?.winner_folio}`);
+      this.toast.info('Sorteo ya realizado', 'El ganador fue el folio ' + this.data()?.winner_folio);
       return;
     }
     if (c.status === 'paid') {
-      this.toast.info('Boleto pagado', `El folio ${this.pad(c.folio)} ya está confirmado`);
+      this.toast.info('Boleto pagado', 'El folio ' + this.pad(c.folio) + ' ya esta confirmado');
       return;
     }
     if (c.status !== 'free') {
-      this.toast.warning(
-        'Boleto tomado',
-        `El folio ${this.pad(c.folio)} ya lo tiene alguien. Elige otro.`,
-      );
+      this.toast.warning('Boleto tomado', 'El folio ' + this.pad(c.folio) + ' ya lo tiene alguien. Elige otro.');
       return;
     }
     this.selected.set(c);
-    this.code = '';
+    this.regName = '';
+    this.regPhone = '';
     this.error.set('');
   }
 
-  goToScratch() {
+  claimTicket() {
     const sel = this.selected();
     if (!sel) return;
-    const cod = (this.code || '').trim().toUpperCase();
-    if (cod.length < 3) {
-      this.error.set('Escribe tu código de acceso');
+    const name = (this.regName || '').trim();
+    const phone = (this.regPhone || '').replace(/\D/g, '');
+    if (name.length < 3) {
+      this.error.set('Escribe tu nombre completo');
       return;
     }
-    this.router.navigate(['/jugar', this.slug], {
-      queryParams: { folio: sel.folio, cod },
+    if (phone.length < 10) {
+      this.error.set('Telefono debe tener 10 digitos');
+      return;
+    }
+    this.claiming.set(true);
+    this.error.set('');
+
+    this.api.claimTicket(this.slug, { folio: sel.folio, name, phone }).subscribe({
+      next: (res: any) => {
+        this.claiming.set(false);
+        this.toast.success('¡Boleto asignado!', 'Folio ' + this.pad(sel.folio) + ' es tuyo. Ahora raspa.');
+        // Ir al raspadito con el codigo que devuelve el backend
+        this.router.navigate(['/jugar', this.slug], {
+          queryParams: { folio: sel.folio, cod: res.code },
+        });
+      },
+      error: (err: any) => {
+        this.claiming.set(false);
+        this.error.set(err?.error?.detail || 'No se pudo asignar el boleto');
+        // Si ya fue tomado, recargar el tablero
+        if (String(err?.error?.detail || '').includes('tomado')) {
+          this.selected.set(null);
+          this.ngOnInit();
+        }
+      },
     });
   }
 }

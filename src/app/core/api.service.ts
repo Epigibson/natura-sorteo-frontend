@@ -105,6 +105,13 @@ export class ApiService {
     return this.http.get<any>(`${API}/public/raffles/${slug}/board`);
   }
 
+  claimTicket(
+    slug: string,
+    body: { folio: number; name: string; phone: string },
+  ): Observable<any> {
+    return this.http.post<any>(`${API}/public/raffles/${slug}/claim`, body);
+  }
+
   access(body: {
     folio: number;
     code: string;
