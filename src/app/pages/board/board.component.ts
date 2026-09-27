@@ -782,8 +782,7 @@ export class BoardComponent implements OnInit {
     if (savedName && savedPhone) {
       this.regName = savedName;
       this.regPhone = savedPhone;
-      this.selected.set(c);  // ← CRITICAL: set selected before claim
-      this.claimTicket();
+      this.claimTicket(c);  // Pasar card directo, sin abrir modal
       return;
     }
     this.selected.set(c);
@@ -843,8 +842,8 @@ export class BoardComponent implements OnInit {
     });
   }
 
-  claimTicket() {
-    const sel = this.selected();
+  claimTicket(cardOverride?: BoardCard) {
+    const sel = cardOverride || this.selected();
     if (!sel) return;
     const name = (this.regName || '').trim();
     const phone = (this.regPhone || '').replace(/\D/g, '');
@@ -863,6 +862,7 @@ export class BoardComponent implements OnInit {
       next: (res: any) => {
         this.claiming.set(false);
         this.selected.set(null);
+        this.error.set('');
         this.toast.success('¡Boleto asignado!', 'Folio ' + this.pad(sel.folio) + ' es tuyo. Puedes reclamar más o rasparlo.');
         // Guardar localmente SIN recargar el tablero
         this.claimedCodes[sel.folio] = res.code;
