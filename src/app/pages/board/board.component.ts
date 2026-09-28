@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { ScratchCardComponent } from '../../core/scratch-card.component';
+import { BankDataComponent } from '../../core/bank-data.component';
+import { bankDataText } from '../../core/bank-data';
 import { ToastService } from '../../core/toast.service';
 
 interface BoardCard {
@@ -30,7 +32,7 @@ interface BoardData {
 @Component({
   selector: 'app-board',
   standalone: true,
-  imports: [CommonModule, FormsModule, ScratchCardComponent],
+  imports: [CommonModule, FormsModule, ScratchCardComponent, BankDataComponent],
   template: `
     <div class="board-page">
       <!-- HEADER -->
@@ -89,6 +91,13 @@ interface BoardData {
                 </div>
               }
               <div class="ss-total">Total: <strong>\${{ getTotal() }}</strong></div>
+
+              <p class="ss-pay-hint">
+                ✅ Ya solo falta pagar. Transfiere el total con los datos de
+                abajo, manda tu captura por WhatsApp y aseguras tu lugar.
+              </p>
+              <app-bank-data />
+
               <button class="btn-wa-big" (click)="sendAllWhatsApp()">📲 Enviar a la organizadora por WhatsApp</button>
             </div>
           }
@@ -519,6 +528,13 @@ interface BoardData {
         color: #f0c94e;
         border-top: 1px solid rgba(255,255,255,0.06);
         margin-top: 8px;
+      }
+      .ss-pay-hint {
+        color: rgba(255,255,255,0.85);
+        font-size: 13.5px;
+        line-height: 1.5;
+        text-align: center;
+        margin: 16px 0 12px;
       }
       .btn-wa-big {
         width: 100%;
@@ -965,7 +981,8 @@ export class BoardComponent implements OnInit {
       msg += '  Folio ' + this.pad(res.folio) + ' → $' + res.amount + '\n';
     }
     msg += '\n💰 Total: $' + results.reduce((a, r2) => a + r2.amount, 0);
-    msg += '\n\nPor favor confirma mis boletos. ¡Gracias! 🍀';
+    msg += '\n\n' + bankDataText() + '\n\n';
+    msg += 'Voy a pagar y te mando la captura. Por favor confirma mis boletos. ¡Gracias! 🍀';
     window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
     this.toast.success('WhatsApp abierto', 'Envía el mensaje a la organizadora');
   }
