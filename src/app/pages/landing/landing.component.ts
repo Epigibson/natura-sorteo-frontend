@@ -37,9 +37,10 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
           </div>
 
           <h1 class="hero-title">
-            Gánate el
-            <span class="title-highlight">{{ r.prize }}</span>
+            {{ r.title }}
           </h1>
+          <p class="hero-prize-label">🏆 Gánate el</p>
+          <p class="hero-prize-name">{{ r.prize }}</p>
 
           <p class="hero-sub">
             Un raspadito, un boleto, una oportunidad de ganar.
@@ -124,7 +125,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
               <span class="cta-text">Elegir mi boleto</span>
               <span class="cta-arrow">→</span>
             </button>
-            <p class="cta-note">Solo 21 boletos · Precio al raspar · Todos ganan oportunidad</p>
+            <p class="cta-note">Solo {{ raffle()?.ticket_count }} boletos · Precio al raspar · Todos ganan oportunidad</p>
           }
         } @else {
           <div class="loading-hero">
@@ -215,7 +216,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
             <div class="fc-icon">⚖️</div>
           </div>
           <h4>Misma probabilidad</h4>
-          <p>Pagues $30 o $50, todos tienen la misma oportunidad de ganar el premio.</p>
+          <p>Pagues \${{ raffle()?.price_min }} o \${{ raffle()?.price_max }}, todos tienen la misma oportunidad de ganar.</p>
           <div class="fc-shine"></div>
         </div>
         <div class="feature-card fc-glow">
@@ -424,10 +425,30 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     }
 
     .hero-title {
-      font-size: clamp(32px, 6vw, 56px);
-      font-weight: 800;
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 900;
       color: #fff;
       line-height: 1.15;
+      margin-bottom: 8px;
+      max-width: 700px;
+    }
+    .hero-prize-label {
+      font-size: 14px;
+      color: rgba(201,162,39,0.8);
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .hero-prize-name {
+      font-size: clamp(22px, 4vw, 36px);
+      font-weight: 800;
+      background: linear-gradient(135deg, #c9a227, #f0c94e, #c9a227);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 3s ease-in-out infinite;
       margin-bottom: 18px;
       max-width: 700px;
     }
