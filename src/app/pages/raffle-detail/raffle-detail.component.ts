@@ -246,8 +246,16 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
 
                 <div class="field">
                   <label>🎥 Enlace de videollamada (Meet / Zoom)</label>
-                  <input [(ngModel)]="editMeetUrl" placeholder="https://meet.google.com/xxx-yyyy-zzz" />
-                  <div class="upload-hint">El sorteo siempre es a las 12:00 PM. El enlace se muestra en la landing.</div>
+                  <input [(ngModel)]="editMeetUrl" placeholder="https://meet.google.com/hea-kbvn-hja" />
+                  <div class="upload-hint">
+                    El sorteo siempre es a las 12:00 PM. El enlace se muestra en la landing.
+                    Usa el mismo enlace de siempre: <strong>meet.google.com/hea-kbvn-hja</strong>
+                  </div>
+                  @if (editMeetUrl !== defaultMeetUrl) {
+                    <button class="btn-sm btn-copy" type="button" (click)="editMeetUrl = defaultMeetUrl">
+                      ↩️ Usar enlace predeterminado
+                    </button>
+                  }
                 </div>
 
                 <div class="field-row">
@@ -1209,12 +1217,13 @@ export class RaffleDetailComponent implements OnInit {
     this.editDrawDate = r.draw_date || '';
     this.editNotes = r.notes || '';
     this.editImageUrl = (r as any).image_url || '';
-    this.editMeetUrl = (r as any).meet_url || '';
+    this.editMeetUrl = (r as any).meet_url || this.defaultMeetUrl;
     this.editMaxTickets = (r as any).max_tickets_per_person ?? 3;
     this.editOpen.set(true);
   }
 
   editOpen = signal(false);
+  readonly defaultMeetUrl = 'https://meet.google.com/hea-kbvn-hja';
   editTitle = '';
   editPrize = '';
   editPrizeValue = 0;
@@ -1255,7 +1264,7 @@ export class RaffleDetailComponent implements OnInit {
       draw_date: this.editDrawDate || null,
       notes: this.editNotes || null,
       image_url: this.editImageUrl || null,
-      meet_url: this.editMeetUrl || null,
+      meet_url: normalizeMeetUrl(this.editMeetUrl) || this.defaultMeetUrl,
       max_tickets_per_person: this.editMaxTickets,
     };
     this.editSaving.set(true);
@@ -1371,4 +1380,11 @@ export class RaffleDetailComponent implements OnInit {
       this.toast.success('Código copiado', 'Folio ' + t.folio + ': ' + t.access_code);
     });
   }
+}
+
+function normalizeMeetUrl(url: string): string {
+  const v = (url || '').trim();
+  if (!v) return '';
+  if (/^https?:\/\//i.test(v)) return v.replace(/^http:\/\//i, 'https://');
+  return 'https://' + v.replace(/^\/+/, '');
 }

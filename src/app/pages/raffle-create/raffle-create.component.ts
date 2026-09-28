@@ -67,6 +67,10 @@ import { ToastService } from '../../core/toast.service';
         <label>Fecha del sorteo (opcional)</label>
         <input type="date" [(ngModel)]="drawDate" />
 
+        <label>🎥 Enlace de videollamada</label>
+        <input [(ngModel)]="meetUrl" placeholder="https://meet.google.com/hea-kbvn-hja" />
+        <div class="hint">Se usa el mismo enlace para todos los sorteos (12:00 PM del día del sorteo).</div>
+
         <label>Notas (opcional)</label>
         <textarea [(ngModel)]="notes" rows="3" placeholder="Instrucciones internas…"></textarea>
 
@@ -207,6 +211,7 @@ export class RaffleCreateComponent {
   priceMax = 50;
   drawDate = '';
   notes = '';
+  meetUrl = 'https://meet.google.com/hea-kbvn-hja';
   maxTickets = 3;
   loading = signal(false);
   error = signal('');
@@ -254,6 +259,7 @@ export class RaffleCreateComponent {
         price_max: this.priceMax,
         draw_date: this.drawDate || undefined,
         notes: this.notes || undefined,
+        meet_url: this.meetUrl || undefined,
         max_tickets_per_person: this.maxTickets,
       })
       .subscribe({

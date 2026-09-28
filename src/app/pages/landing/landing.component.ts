@@ -97,22 +97,24 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
               <div class="wh-folio">Folio {{ r.winner_folio }}</div>
             </div>
           } @else {
-            @if ($any(r).meet_url && !r.drawn) {
-              <div class="meet-banner">
-                <div class="meet-icon">🎥</div>
-                <div class="meet-info">
-                  <div class="meet-label">VIDEOCALL DEL SORTEO</div>
-                  <div class="meet-text">
-                    {{ formatDate(r.draw_date || '') }} a las 12:00 PM
-                  </div>
-                  <div class="meet-sub">Entra y vive el sorteo en vivo</div>
+            @if (meetDialog()) {
+              <div class="meet-modal-bg" (click)="meetDialog.set(false)">
+                <div class="meet-modal" (click)="$event.stopPropagation()">
+                  <div class="mm-icon">🎥</div>
+                  <h3>Videollamada del sorteo</h3>
+                  <p class="mm-text">
+                    Se abrirá {{ meetProviderName() }} para ver el sorteo en vivo
+                    el {{ formatDate(raffle()?.draw_date || '') }} a las 12:00 PM.
+                  </p>
+                  <button class="mm-open" (click)="confirmOpenMeet()">Abrir {{ meetProviderName() }}</button>
+                  <button class="mm-copy" (click)="copyMeetLink()">📋 Copiar enlace</button>
+                  <button class="mm-close" (click)="meetDialog.set(false)">Cerrar</button>
                 </div>
-                <a class="meet-btn" [href]="$any(r).meet_url" target="_blank">Entrar →</a>
               </div>
             }
 
             @if (r.draw_date) {
-              <div class="countdown">
+              <div class="countdown" [class.has-meet]="!!$any(r).meet_url">
                 <div class="cd-label">⏰ El sorteo es en</div>
                 <div class="cd-grid">
                   <div class="cd-box">
@@ -133,7 +135,16 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
                   </div>
                 </div>
                 <div class="cd-date">📅 {{ formatDate(r.draw_date) }} · 12:00 PM</div>
+                @if ($any(r).meet_url && !r.drawn) {
+                  <button class="cd-meet" type="button" (click)="openMeet()">
+                    🎥 Entra a la videollamada en vivo
+                  </button>
+                }
               </div>
+            } @else if ($any(r).meet_url && !r.drawn) {
+              <button class="cd-meet cd-meet-solo" type="button" (click)="openMeet()">
+                🎥 Entra a la videollamada en vivo
+              </button>
             }
             <button class="cta-main" (click)="goToBoard()">
               <span class="cta-text">Elegir mi boleto</span>
@@ -599,61 +610,98 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       background: rgba(255,255,255,0.1);
     }
 
-    /* COUNTDOWN */
-    .meet-banner {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      background: rgba(255,255,255,0.06);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(201,162,39,0.2);
-      border-radius: 18px;
-      padding: 18px 20px;
-      margin-bottom: 20px;
+    /* MEET (dentro del countdown — sin bloque extra) */
+    .cd-meet {
+      display: block;
       width: 100%;
-      max-width: 440px;
-    }
-    .meet-icon {
-      font-size: 28px;
-      flex-shrink: 0;
-    }
-    .meet-info {
-      flex: 1;
-      text-align: left;
-    }
-    .meet-label {
-      font-size: 10px;
-      letter-spacing: 2px;
-      color: #f0c94e;
-      font-weight: 800;
-    }
-    .meet-text {
-      font-size: 13px;
-      color: #f0c94e;
-      font-weight: 700;
-      margin-top: 2px;
-    }
-    .meet-sub {
-      font-size: 11px;
-      color: rgba(255,255,255,0.5);
-      margin-top: 2px;
-    }
-    .meet-btn {
-      padding: 10px 18px;
-      background: linear-gradient(135deg, #c9a227, #f0c94e);
-      color: #1a1a2e;
-      border: none;
+      margin-top: 12px;
+      padding: 11px 14px;
+      border: 1px solid rgba(201,162,39,0.45);
       border-radius: 12px;
+      background: linear-gradient(135deg, rgba(201,162,39,0.22), rgba(240,201,78,0.12));
+      color: #f0c94e;
       font-weight: 800;
       font-size: 13px;
-      text-decoration: none;
+      cursor: pointer;
+      font-family: inherit;
       white-space: nowrap;
       transition: all 0.2s;
-      font-family: inherit;
     }
-    .meet-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(201,162,39,0.35);
+    .cd-meet:hover {
+      background: linear-gradient(135deg, #c9a227, #f0c94e);
+      color: #1a1a2e;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(201,162,39,0.3);
+    }
+    .cd-meet-solo {
+      margin: 0 auto 20px;
+      max-width: 440px;
+    }
+
+    .meet-modal-bg {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 10, 21, 0.72);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5000;
+      padding: 20px;
+    }
+    .meet-modal {
+      background: #0d1526;
+      border: 1px solid rgba(201,162,39,0.35);
+      border-radius: 22px;
+      padding: 28px 22px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      color: #fff;
+    }
+    .meet-modal .mm-icon { font-size: 42px; margin-bottom: 10px; }
+    .meet-modal h3 { margin: 0 0 10px; font-size: 20px; color: #fff; }
+    .mm-text {
+      font-size: 13px;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.55;
+      margin: 0 0 20px;
+    }
+    .mm-open {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #c9a227, #f0c94e);
+      color: #1a1a2e;
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+      font-family: inherit;
+      margin-bottom: 10px;
+    }
+    .mm-copy {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 14px;
+      background: transparent;
+      color: #fff;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: inherit;
+      margin-bottom: 8px;
+    }
+    .mm-close {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.45);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
     }
 
     .draw-live {
@@ -1485,4 +1533,46 @@ export class LandingComponent implements OnInit {
   goToBoard() {
     this.router.navigate(['/sorteo', this.slug, 'tablero']);
   }
+
+  meetDialog = signal(false);
+
+  private meetUrl(): string {
+    return normalizeMeetUrl((this.raffle() as any)?.meet_url || '');
+  }
+
+  meetProviderName(): string {
+    const u = this.meetUrl().toLowerCase();
+    if (u.includes('zoom')) return 'Zoom';
+    if (u.includes('meet.google')) return 'Google Meet';
+    return 'la videollamada';
+  }
+
+  openMeet() {
+    this.meetDialog.set(true);
+  }
+
+  confirmOpenMeet() {
+    const url = this.meetUrl();
+    if (!url) return;
+    this.meetDialog.set(false);
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+
+  async copyMeetLink() {
+    const url = this.meetUrl();
+    if (!url) return;
+    try {
+      await navigator.clipboard.writeText(url);
+      this.toast.success('Enlace copiado', 'Pégalo en tu app de reuniones');
+    } catch {
+      this.toast.error('No se pudo copiar', url);
+    }
+  }
+}
+
+function normalizeMeetUrl(url: string): string {
+  const v = (url || '').trim();
+  if (!v) return '';
+  if (/^https?:\/\//i.test(v)) return v.replace(/^http:\/\//i, 'https://');
+  return 'https://' + v.replace(/^\/+/, '');
 }
