@@ -247,7 +247,7 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
                 <div class="field">
                   <label>🎥 Enlace de videollamada (Meet / Zoom)</label>
                   <input [(ngModel)]="editMeetUrl" placeholder="https://meet.google.com/xxx-yyyy-zzz" />
-                  <div class="upload-hint">Se mostrará en la landing para que todos puedan entrar al sorteo</div>
+                  <div class="upload-hint">El sorteo siempre es a las 12:00 PM. El enlace se muestra en la landing.</div>
                 </div>
 
                 <div class="field-row">

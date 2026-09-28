@@ -102,7 +102,10 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
                 <div class="meet-icon">🎥</div>
                 <div class="meet-info">
                   <div class="meet-label">VIDEOCALL DEL SORTEO</div>
-                  <div class="meet-text">Entra y vive el sorteo en vivo</div>
+                  <div class="meet-text">
+                    {{ formatDate(r.draw_date || '') }} a las 12:00 PM
+                  </div>
+                  <div class="meet-sub">Entra y vive el sorteo en vivo</div>
                 </div>
                 <a class="meet-btn" [href]="$any(r).meet_url" target="_blank">Entrar →</a>
               </div>
@@ -129,7 +132,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
                     <div class="cd-t">seg</div>
                   </div>
                 </div>
-                <div class="cd-date">📅 {{ formatDate(r.draw_date) }}</div>
+                <div class="cd-date">📅 {{ formatDate(r.draw_date) }} · 12:00 PM</div>
               </div>
             }
             <button class="cta-main" (click)="goToBoard()">
@@ -284,7 +287,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
         @if (!raffle()?.drawn) {
           <div class="sh-badge sh-badge-gold">ÚLTIMA OPORTUNIDAD</div>
           <h2>¿Listo para raspar tu suerte?</h2>
-          <p>Los boletos son limitados. Elige el tuyo ahora y participa por el premio.</p>
+          <p>Los boletos son limitados. El sorteo es en vivo a las 12:00 PM del día indicado.</p>
           <button class="cta-main cta-large" (click)="goToBoard()">
             <span class="cta-text">Ver boletos disponibles</span>
             <span class="cta-arrow">→</span>
@@ -312,6 +315,8 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
           <span>Entre conocidos</span>
           <span class="footer-dot">·</span>
           <span>100% transparente</span>
+          <span class="footer-dot">·</span>
+          <span>Sorteo a las 12:00 PM</span>
         </div>
         <p class="footer-copy">Todos los derechos reservados</p>
       </div>
@@ -624,7 +629,13 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     }
     .meet-text {
       font-size: 13px;
-      color: rgba(255,255,255,0.7);
+      color: #f0c94e;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+    .meet-sub {
+      font-size: 11px;
+      color: rgba(255,255,255,0.5);
       margin-top: 2px;
     }
     .meet-btn {
