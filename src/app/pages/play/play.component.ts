@@ -5,6 +5,8 @@ import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { ToastService } from '../../core/toast.service';
 import { ScratchCardComponent } from '../../core/scratch-card.component';
+import { BankDataComponent } from '../../core/bank-data.component';
+import { BANK_DATA } from '../../core/bank-data';
 import { AccessCheck, PublicRaffle } from '../../core/models';
 
 type Paso = 'acceso' | 'registro' | 'raspa' | 'resultado' | 'ganador' | 'error-acceso';
@@ -12,7 +14,7 @@ type Paso = 'acceso' | 'registro' | 'raspa' | 'resultado' | 'ganador' | 'error-a
 @Component({
   selector: 'app-play',
   standalone: true,
-  imports: [CommonModule, FormsModule, ScratchCardComponent],
+  imports: [CommonModule, FormsModule, ScratchCardComponent, BankDataComponent],
   template: `
     <div class="play-wrap">
       <div class="card">
@@ -113,6 +115,9 @@ type Paso = 'acceso' | 'registro' | 'raspa' | 'resultado' | 'ganador' | 'error-a
             />
 
             @if (revealed()) {
+              <div class="pay-now">
+                <app-bank-data />
+              </div>
               <button class="btn-wa" (click)="sendWhatsApp()">
                 📲 Enviar mis datos por WhatsApp
               </button>
@@ -130,10 +135,11 @@ type Paso = 'acceso' | 'registro' | 'raspa' | 'resultado' | 'ganador' | 'error-a
               <div class="label">Tu boleto cuesta</div>
               <div class="amount-big">\${{ amount() }}</div>
               <p class="hint">
-                Paga este monto con la forma de pago que te indique la organizadora
-                para asegurar tu lugar en el sorteo.
+                Realiza tu pago con los datos de abajo para asegurar tu lugar
+                en el sorteo.
               </p>
             </div>
+            <app-bank-data />
             <button class="btn-wa" (click)="sendWhatsApp()">
               📲 Enviar mis datos por WhatsApp
             </button>
@@ -264,6 +270,10 @@ type Paso = 'acceso' | 'registro' | 'raspa' | 'resultado' | 'ganador' | 'error-a
         border-radius: 16px;
         padding: 28px 18px;
         margin-bottom: 16px;
+      }
+      .pay-now {
+        margin: 16px 0 4px;
+        text-align: left;
       }
       .result-box .label {
         font-size: 11px;
@@ -461,7 +471,12 @@ export class PlayComponent implements OnInit {
       `Nombre: ${this.name}\n` +
       `Teléfono: ${this.phone}\n` +
       `Monto del boleto: $${this.amount()}\n` +
-      `Estado: raspado (falta confirmar pago)`;
+      `Estado: raspado (falta confirmar pago)\n\n` +
+      `Datos para pago:\n` +
+      `Beneficiario: ${BANK_DATA.beneficiary}\n` +
+      `Cuenta: ${BANK_DATA.accountNumber}\n` +
+      `CLABE: ${BANK_DATA.clabe}\n` +
+      `Tarjeta: ${BANK_DATA.cardNumber}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
   }
 

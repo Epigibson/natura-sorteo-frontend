@@ -6,6 +6,7 @@ import { ApiService } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { ToastService } from '../../core/toast.service';
 import { ModalService } from '../../core/modal.service';
+import { bankDataText } from '../../core/bank-data';
 import { Raffle, RaffleStats, Ticket } from '../../core/models';
 
 @Component({
@@ -1317,8 +1318,9 @@ export class RaffleDetailComponent implements OnInit {
       'Recordatorio: tu boleto *folio ' + t.folio + '* de la rifa *' + (r?.title || '') + '* ' +
       'aun no esta pagado.\n\n' +
       'Monto: *$' + t.amount + '*\n' +
-      'Para asegurar tu lugar en el sorteo, realiza tu pago.\n\n' +
-      'Cualquier duda, escribeme. Suerte!';
+      'Para asegurar tu lugar en el sorteo, realiza tu pago con estos datos:\n\n' +
+      bankDataText() + '\n\n' +
+      'Mandame la captura cuando lo hagas. Cualquier duda, escribeme. Suerte!';
     const tel = (t.participant?.phone || '').replace(/\D/g, '');
     const waUrl = tel ? 'https://wa.me/52' + tel + '?text=' + encodeURIComponent(msg) : 'https://wa.me/?text=' + encodeURIComponent(msg);
     window.open(waUrl, '_blank');
