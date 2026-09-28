@@ -244,6 +244,12 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
                   <input type="date" [(ngModel)]="editDrawDate" />
                 </div>
 
+                <div class="field">
+                  <label>🎥 Enlace de videollamada (Meet / Zoom)</label>
+                  <input [(ngModel)]="editMeetUrl" placeholder="https://meet.google.com/xxx-yyyy-zzz" />
+                  <div class="upload-hint">Se mostrará en la landing para que todos puedan entrar al sorteo</div>
+                </div>
+
                 <div class="field-row">
                   <div class="field">
                     <label>📝 Notas</label>
@@ -1203,6 +1209,7 @@ export class RaffleDetailComponent implements OnInit {
     this.editDrawDate = r.draw_date || '';
     this.editNotes = r.notes || '';
     this.editImageUrl = (r as any).image_url || '';
+    this.editMeetUrl = (r as any).meet_url || '';
     this.editMaxTickets = (r as any).max_tickets_per_person ?? 3;
     this.editOpen.set(true);
   }
@@ -1214,6 +1221,7 @@ export class RaffleDetailComponent implements OnInit {
   editDrawDate = '';
   editNotes = '';
   editImageUrl = '';
+  editMeetUrl = '';
   editMaxTickets = 3;
   editSaving = signal(false);
 
@@ -1247,6 +1255,7 @@ export class RaffleDetailComponent implements OnInit {
       draw_date: this.editDrawDate || null,
       notes: this.editNotes || null,
       image_url: this.editImageUrl || null,
+      meet_url: this.editMeetUrl || null,
       max_tickets_per_person: this.editMaxTickets,
     };
     this.editSaving.set(true);

@@ -97,6 +97,17 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
               <div class="wh-folio">Folio {{ r.winner_folio }}</div>
             </div>
           } @else {
+            @if ($any(r).meet_url && !r.drawn) {
+              <div class="meet-banner">
+                <div class="meet-icon">🎥</div>
+                <div class="meet-info">
+                  <div class="meet-label">VIDEOCALL DEL SORTEO</div>
+                  <div class="meet-text">Entra y vive el sorteo en vivo</div>
+                </div>
+                <a class="meet-btn" [href]="$any(r).meet_url" target="_blank">Entrar →</a>
+              </div>
+            }
+
             @if (r.draw_date) {
               <div class="countdown">
                 <div class="cd-label">⏰ El sorteo es en</div>
@@ -584,6 +595,137 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     }
 
     /* COUNTDOWN */
+    .meet-banner {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(201,162,39,0.2);
+      border-radius: 18px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 440px;
+    }
+    .meet-icon {
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+    .meet-info {
+      flex: 1;
+      text-align: left;
+    }
+    .meet-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #f0c94e;
+      font-weight: 800;
+    }
+    .meet-text {
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      margin-top: 2px;
+    }
+    .meet-btn {
+      padding: 10px 18px;
+      background: linear-gradient(135deg, #c9a227, #f0c94e);
+      color: #1a1a2e;
+      border: none;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 13px;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .meet-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(201,162,39,0.35);
+    }
+
+    .draw-live {
+      background: rgba(201,162,39,0.1);
+      border: 2px solid rgba(201,162,39,0.3);
+      border-radius: 24px;
+      padding: 36px 28px;
+      margin-bottom: 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .draw-live::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: conic-gradient(from 0deg, transparent, rgba(201,162,39,0.1), transparent 30%);
+      animation: drawSpin 3s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes drawSpin {
+      to { transform: rotate(360deg); }
+    }
+    .draw-spinner-big {
+      font-size: 56px;
+      animation: drawPulse 0.6s ease-in-out infinite alternate;
+      position: relative;
+    }
+    @keyframes drawPulse {
+      from { transform: scale(1) rotate(-5deg); }
+      to { transform: scale(1.15) rotate(5deg); }
+    }
+    .draw-live h2 {
+      font-size: 24px;
+      font-weight: 900;
+      color: #fff;
+      margin: 12px 0 6px;
+      position: relative;
+    }
+    .draw-live p {
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .draw-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .draw-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #c9a227, #f0c94e);
+      border-radius: 999px;
+      animation: drawFill 4s ease-in-out infinite;
+    }
+    @keyframes drawFill {
+      0% { width: 0%; }
+      50% { width: 80%; }
+      100% { width: 100%; }
+    }
+    .draw-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      position: relative;
+    }
+    .dd {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #c9a227;
+      animation: ddPulse 1.2s ease-in-out infinite;
+    }
+    .dd:nth-child(2) { animation-delay: 0.2s; }
+    .dd:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes ddPulse {
+      0%, 100% { opacity: 0.3; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
     .countdown {
       background: rgba(255,255,255,0.04);
       backdrop-filter: blur(16px);
