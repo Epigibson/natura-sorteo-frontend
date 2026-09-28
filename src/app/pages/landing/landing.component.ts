@@ -348,6 +348,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     /* ===== HERO ===== */
     .hero {
       min-height: 100vh;
+      min-height: 100dvh;
       position: relative;
       display: flex;
       flex-direction: column;
@@ -403,7 +404,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     .nav {
       position: relative;
       z-index: 2;
-      padding: 24px 28px;
+      padding: 16px 28px;
       display: flex;
       justify-content: center;
     }
@@ -422,7 +423,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px 20px 60px;
+      padding: 8px 20px 28px;
       text-align: center;
     }
 
@@ -432,13 +433,13 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       gap: 8px;
       background: rgba(201,162,39,0.15);
       border: 1px solid rgba(201,162,39,0.25);
-      padding: 8px 20px;
+      padding: 6px 18px;
       border-radius: 999px;
       color: #c9a227;
       font-size: 11px;
       letter-spacing: 3px;
       font-weight: 800;
-      margin-bottom: 28px;
+      margin-bottom: 14px;
     }
     .badge-dot {
       width: 7px; height: 7px;
@@ -452,23 +453,23 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     }
 
     .hero-title {
-      font-size: clamp(28px, 5vw, 48px);
+      font-size: clamp(26px, 4.5vw, 42px);
       font-weight: 900;
       color: #fff;
       line-height: 1.15;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
       max-width: 700px;
     }
     .hero-prize-label {
-      font-size: 14px;
+      font-size: 13px;
       color: rgba(201,162,39,0.8);
       font-weight: 700;
       letter-spacing: 2px;
       text-transform: uppercase;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
     .hero-prize-name {
-      font-size: clamp(22px, 4vw, 36px);
+      font-size: clamp(20px, 3.5vw, 30px);
       font-weight: 800;
       background: linear-gradient(135deg, #c9a227, #f0c94e, #c9a227);
       background-size: 200% 200%;
@@ -476,7 +477,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       -webkit-text-fill-color: transparent;
       background-clip: text;
       animation: shimmer 3s ease-in-out infinite;
-      margin-bottom: 18px;
+      margin-bottom: 10px;
       max-width: 700px;
     }
     .title-highlight {
@@ -493,10 +494,10 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     }
 
     .hero-sub {
-      font-size: clamp(15px, 2.5vw, 18px);
+      font-size: clamp(14px, 2.2vw, 16px);
       color: rgba(255,255,255,0.7);
-      line-height: 1.6;
-      margin-bottom: 36px;
+      line-height: 1.5;
+      margin-bottom: 18px;
       max-width: 500px;
     }
 
@@ -505,7 +506,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       position: relative;
       width: 100%;
       max-width: 440px;
-      margin-bottom: 32px;
+      margin-bottom: 18px;
     }
     .pc-glow {
       position: absolute;
@@ -525,15 +526,15 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       backdrop-filter: blur(20px);
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 22px;
-      padding: 24px;
+      padding: 14px;
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 14px;
     }
     .pc-image-wrap {
       position: relative;
-      width: 100px;
-      height: 100px;
+      width: 76px;
+      height: 76px;
       border-radius: 16px;
       overflow: hidden;
       flex-shrink: 0;
@@ -553,7 +554,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       100% { transform: translateX(100%); }
     }
     .pc-icon {
-      font-size: 56px;
+      font-size: 44px;
       flex-shrink: 0;
     }
     .pc-info { text-align: left; }
@@ -562,17 +563,17 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       letter-spacing: 3px;
       color: rgba(201,162,39,0.8);
       font-weight: 800;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
     .pc-name {
-      font-size: 18px;
+      font-size: 15px;
       font-weight: 800;
       color: #fff;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
       line-height: 1.3;
     }
     .pc-value {
-      font-size: 13px;
+      font-size: 12px;
       color: rgba(255,255,255,0.6);
     }
 
@@ -581,7 +582,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       display: flex;
       align-items: center;
       gap: 20px;
-      margin-bottom: 36px;
+      margin-bottom: 18px;
       flex-wrap: wrap;
       justify-content: center;
     }
@@ -589,11 +590,11 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       text-align: center;
     }
     .hs-icon {
-      font-size: 20px;
-      margin-bottom: 4px;
+      font-size: 18px;
+      margin-bottom: 2px;
     }
     .hs-n {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 900;
       color: #fff;
     }
@@ -614,14 +615,14 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
     .cd-meet {
       display: block;
       width: 100%;
-      margin-top: 12px;
-      padding: 11px 14px;
+      margin-top: 8px;
+      padding: 9px 12px;
       border: 1px solid rgba(201,162,39,0.45);
       border-radius: 12px;
       background: linear-gradient(135deg, rgba(201,162,39,0.22), rgba(240,201,78,0.12));
       color: #f0c94e;
       font-weight: 800;
-      font-size: 13px;
+      font-size: 12px;
       cursor: pointer;
       font-family: inherit;
       white-space: nowrap;
@@ -790,31 +791,31 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       backdrop-filter: blur(16px);
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 20px;
-      padding: 22px 28px;
-      margin-bottom: 28px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
     }
     .cd-label {
-      font-size: 11px;
+      font-size: 10px;
       letter-spacing: 3px;
       color: rgba(201,162,39,0.8);
       font-weight: 800;
-      margin-bottom: 14px;
+      margin-bottom: 8px;
     }
     .cd-grid {
       display: flex;
       justify-content: center;
-      gap: 12px;
-      margin-bottom: 12px;
+      gap: 10px;
+      margin-bottom: 8px;
     }
     .cd-box {
       background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 14px;
-      padding: 12px 16px;
-      min-width: 60px;
+      border-radius: 12px;
+      padding: 8px 14px;
+      min-width: 54px;
     }
     .cd-n {
-      font-size: 26px;
+      font-size: 22px;
       font-weight: 900;
       color: #fff;
       font-variant-numeric: tabular-nums;
@@ -861,12 +862,12 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       display: inline-flex;
       align-items: center;
       gap: 12px;
-      padding: 18px 40px;
+      padding: 14px 32px;
       border: none;
       border-radius: 999px;
       background: linear-gradient(135deg, #c9a227, #f0c94e);
       color: #1a1a2e;
-      font-size: 17px;
+      font-size: 15px;
       font-weight: 800;
       cursor: pointer;
       transition: all 0.3s;
@@ -888,7 +889,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       font-size: 19px;
     }
     .cta-note {
-      margin-top: 14px;
+      margin-top: 10px;
       font-size: 12px;
       color: rgba(255,255,255,0.5);
     }
@@ -1439,15 +1440,27 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
 
     /* RESPONSIVE */
     @media (max-width: 768px) {
-      .hero-content { padding: 16px 16px 48px; }
-      .pc-inner { flex-direction: column; text-align: center; }
-      .pc-info { text-align: center; }
-      .pc-image-wrap { width: 120px; height: 120px; }
-      .hero-stats { gap: 14px; }
+      .nav { padding: 12px 16px; }
+      .hero-content { padding: 4px 14px 20px; }
+      .hero-badge { margin-bottom: 10px; padding: 5px 14px; font-size: 10px; letter-spacing: 2px; }
+      .hero-title { font-size: clamp(24px, 7vw, 32px); }
+      .hero-prize-name { font-size: clamp(18px, 5.5vw, 24px); margin-bottom: 8px; }
+      .hero-sub { margin-bottom: 12px; font-size: 13px; }
+      .prize-card { margin-bottom: 12px; }
+      .pc-inner { padding: 12px; gap: 12px; }
+      .pc-image-wrap { width: 64px; height: 64px; }
+      .pc-name { font-size: 13px; }
+      .hero-stats { gap: 14px; margin-bottom: 12px; }
+      .hs-icon { font-size: 16px; }
+      .hs-n { font-size: 18px; }
       .hs-divider { display: none; }
+      .countdown { padding: 12px 14px; margin-bottom: 12px; }
       .cd-grid { gap: 8px; }
-      .cd-box { min-width: 52px; padding: 10px 8px; }
-      .cd-n { font-size: 20px; }
+      .cd-box { min-width: 48px; padding: 6px 8px; border-radius: 10px; }
+      .cd-n { font-size: 18px; }
+      .cd-meet { padding: 8px 10px; font-size: 11px; margin-top: 6px; }
+      .cta-main { padding: 12px 26px; font-size: 14px; }
+      .cta-note { margin-top: 8px; font-size: 11px; }
       .steps-grid { flex-direction: column; align-items: center; }
       .step-connector { transform: rotate(90deg); padding: 8px 0; }
       .step-card { max-width: 100%; width: 100%; }
