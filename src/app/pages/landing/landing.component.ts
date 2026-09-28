@@ -1440,27 +1440,27 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
 
     /* RESPONSIVE */
     @media (max-width: 768px) {
-      .nav { padding: 12px 16px; }
-      .hero-content { padding: 4px 14px 20px; }
-      .hero-badge { margin-bottom: 10px; padding: 5px 14px; font-size: 10px; letter-spacing: 2px; }
-      .hero-title { font-size: clamp(24px, 7vw, 32px); }
-      .hero-prize-name { font-size: clamp(18px, 5.5vw, 24px); margin-bottom: 8px; }
-      .hero-sub { margin-bottom: 12px; font-size: 13px; }
-      .prize-card { margin-bottom: 12px; }
-      .pc-inner { padding: 12px; gap: 12px; }
-      .pc-image-wrap { width: 64px; height: 64px; }
-      .pc-name { font-size: 13px; }
-      .hero-stats { gap: 14px; margin-bottom: 12px; }
-      .hs-icon { font-size: 16px; }
-      .hs-n { font-size: 18px; }
+      .nav { padding: 10px 16px; }
+      .hero-content { padding: 2px 14px 12px; }
+      .hero-badge { margin-bottom: 8px; padding: 5px 14px; font-size: 10px; letter-spacing: 2px; }
+      .hero-title { font-size: clamp(22px, 6.5vw, 32px); }
+      .hero-prize-name { font-size: clamp(17px, 5vw, 24px); margin-bottom: 6px; }
+      .hero-sub { margin-bottom: 10px; font-size: 12.5px; }
+      .prize-card { margin-bottom: 10px; }
+      .pc-inner { padding: 10px; gap: 10px; }
+      .pc-image-wrap { width: 56px; height: 56px; }
+      .pc-name { font-size: 12.5px; }
+      .hero-stats { gap: 12px; margin-bottom: 10px; }
+      .hs-icon { font-size: 15px; }
+      .hs-n { font-size: 17px; }
       .hs-divider { display: none; }
-      .countdown { padding: 12px 14px; margin-bottom: 12px; }
-      .cd-grid { gap: 8px; }
-      .cd-box { min-width: 48px; padding: 6px 8px; border-radius: 10px; }
-      .cd-n { font-size: 18px; }
-      .cd-meet { padding: 8px 10px; font-size: 11px; margin-top: 6px; }
-      .cta-main { padding: 12px 26px; font-size: 14px; }
-      .cta-note { margin-top: 8px; font-size: 11px; }
+      .countdown { padding: 10px 12px; margin-bottom: 8px; }
+      .cd-grid { gap: 6px; margin-bottom: 6px; }
+      .cd-box { min-width: 44px; padding: 5px 7px; border-radius: 10px; }
+      .cd-n { font-size: 17px; }
+      .cd-meet { padding: 7px 10px; font-size: 11px; margin-top: 4px; }
+      .cta-main { padding: 11px 22px; font-size: 13.5px; }
+      .cta-note { margin-top: 6px; font-size: 10.5px; }
       .steps-grid { flex-direction: column; align-items: center; }
       .step-connector { transform: rotate(90deg); padding: 8px 0; }
       .step-card { max-width: 100%; width: 100%; }
