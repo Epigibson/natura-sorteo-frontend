@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -760,7 +760,7 @@ interface BoardData {
     `,
   ],
 })
-export class BoardComponent implements OnInit {
+export class BoardComponent implements OnInit, OnDestroy {
   data = signal<BoardData | null>(null);
   cards = signal<BoardCard[]>([]);
   loading = signal(true);
@@ -809,14 +809,82 @@ export class BoardComponent implements OnInit {
     private toast: ToastService,
   ) {}
 
+  private syncTimer: any = null;
+  private onVisible = () => {
+    if (document.visibilityState === 'visible') this.syncMine();
+  };
+
+  ngOnDestroy() {
+    if (this.syncTimer) clearInterval(this.syncTimer);
+    document.removeEventListener('visibilitychange', this.onVisible);
+  }
+
+  /**
+   * Reconcilia lo guardado en el navegador con el servidor: si Yuri (o la auto-liberación)
+   * soltó un boleto, su código cambió y aquí se borra de la vista y del almacenamiento local.
+   */
+  syncMine() {
+    const folios = Array.from(this.claimedFolios);
+    if (folios.length === 0) return;
+    const tickets = folios
+      .filter(f => this.claimedCodes[f])
+      .map(f => ({ folio: f, code: this.claimedCodes[f] }));
+    // Folios sin código guardado no se pueden verificar ni usar: se limpian
+    const orphans = folios.filter(f => !this.claimedCodes[f]);
+    this.api.checkMine(this.slug, tickets).subscribe({
+      next: (res) => {
+        const lost = [...orphans, ...res.tickets.filter(t => !t.valid).map(t => t.folio)];
+        if (lost.length === 0) return;
+        for (const f of lost) {
+          this.claimedFolios.delete(f);
+          delete this.claimedCodes[f];
+          delete this.amountMap[f];
+        }
+        this.scratchedResults.set(this.scratchedResults().filter(r => !lost.includes(r.folio)));
+        if (this.claimedFolios.size === 0) {
+          this.scratchMode.set(false);
+          this.allScratched.set(false);
+          localStorage.removeItem('sn_claimed_' + this.slug);
+        } else {
+          this.saveClaimedState();
+        }
+        this.toast.warning(
+          'Boleto liberado',
+          lost.length === 1
+            ? 'El folio ' + this.pad(lost[0]) + ' ya no es tuyo (fue liberado por la organizadora).'
+            : 'Los folios ' + lost.map(f => this.pad(f)).join(', ') + ' ya no son tuyos (fueron liberados).',
+        );
+        this.refreshBoard();
+      },
+      // Si falla la red no tocamos nada: se reintenta en el siguiente ciclo
+      error: () => {},
+    });
+  }
+
+  refreshBoard() {
+    this.api.getBoard(this.slug).subscribe({
+      next: (d: any) => {
+        this.data.set(d);
+        // conservar visualmente como 'registered' lo que el participante tiene localmente
+        this.cards.set(d.cards);
+      },
+      error: () => {},
+    });
+  }
+
   ngOnInit() {
     this.slug = this.route.snapshot.paramMap.get('slug') || '';
     this.loadClaimedState();
+    if (!this.syncTimer) {
+      this.syncTimer = setInterval(() => this.syncMine(), 60000);
+      document.addEventListener('visibilitychange', this.onVisible);
+    }
     this.api.getBoard(this.slug).subscribe({
       next: (d: any) => {
         this.data.set(d);
         this.cards.set(d.cards);
         this.loading.set(false);
+        this.syncMine();
       },
       error: () => {
         this.loading.set(false);
@@ -913,8 +981,9 @@ export class BoardComponent implements OnInit {
 
   deselectTicket(card: BoardCard) {
     const phone = localStorage.getItem('sn_phone_' + this.slug) || '';
-    if (!phone) return;
-    this.api.releasePublicTicket(this.slug, { folio: card.folio, phone }).subscribe({
+    const code = this.claimedCodes[card.folio] || '';
+    if (!phone || !code) return;
+    this.api.releasePublicTicket(this.slug, { folio: card.folio, phone, code }).subscribe({
       next: () => {
         this.claimedFolios.delete(card.folio);
         delete this.claimedCodes[card.folio];

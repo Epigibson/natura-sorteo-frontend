@@ -160,6 +160,11 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
                 }
                 @if (t.status === 'paid') {
                   <span class="ok">✅</span>
+                  @if (auth.user()?.role === 'admin' && raffle()?.status !== 'drawn') {
+                    <button class="btn-sm btn-danger" (click)="unpay(t)" title="Deshacer pago marcado por error">
+                      Deshacer pago
+                    </button>
+                  }
                 }
                 @if (t.status === 'free' || t.status === 'paid') {
                   <button class="btn-sm btn-wa" (click)="sendWhatsApp(t)" title="Enviar por WhatsApp">
@@ -1022,6 +1027,7 @@ export class RaffleDetailComponent implements OnInit {
       confirmLabel: 'Marcar como pagado',
       required: false,
     });
+    if (note === null) return; // canceló el diálogo: no se cobra
     this.api.markPaid(this.raffleId, t.folio, note || undefined).subscribe({
       next: () => {
         this.toast.success('Pago registrado', `Folio ${t.folio} marcado como pagado ✅`);
@@ -1029,6 +1035,28 @@ export class RaffleDetailComponent implements OnInit {
       },
       error: (err) =>
         this.toast.error('Error al cobrar', err?.error?.detail || 'Intenta de nuevo'),
+    });
+  }
+
+  async unpay(t: Ticket) {
+    const reason = await this.modal.prompt({
+      title: `Deshacer pago del folio ${t.folio}`,
+      message:
+        'El boleto dejará de contar como pagado y no entrará al sorteo. ' +
+        'Queda registrado en la bitácora.',
+      label: 'Motivo (opcional)',
+      placeholder: 'Se marcó por error / no llegó el pago…',
+      confirmLabel: 'Deshacer pago',
+      required: false,
+    });
+    if (reason === null) return;
+    this.api.unpayTicket(this.raffleId, t.folio, reason || undefined).subscribe({
+      next: () => {
+        this.toast.info('Pago deshecho', `Folio ${t.folio} ya no cuenta como pagado`);
+        this.reload();
+      },
+      error: (err) =>
+        this.toast.error('No se pudo deshacer', err?.error?.detail || 'Intenta de nuevo'),
     });
   }
 

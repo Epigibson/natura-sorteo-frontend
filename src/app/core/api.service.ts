@@ -64,6 +64,13 @@ export class ApiService {
     );
   }
 
+  unpayTicket(raffleId: string, folio: number, reason?: string): Observable<Ticket> {
+    return this.http.post<Ticket>(
+      `${API}/raffles/${raffleId}/tickets/${folio}/unpay`,
+      { reason },
+    );
+  }
+
   releaseTicket(raffleId: string, folio: number): Observable<Ticket> {
     return this.http.post<Ticket>(
       `${API}/raffles/${raffleId}/tickets/${folio}/release`,
@@ -120,8 +127,11 @@ export class ApiService {
     });
   }
 
-  changePassword(current: string, next: string): Observable<{ ok: boolean; message: string }> {
-    return this.http.post<{ ok: boolean; message: string }>(`${API}/change-password`, {
+  changePassword(
+    current: string,
+    next: string,
+  ): Observable<{ ok: boolean; message: string; access_token: string; refresh_token: string }> {
+    return this.http.post<any>(`${API}/change-password`, {
       current_password: current,
       new_password: next,
     });
@@ -136,8 +146,15 @@ export class ApiService {
     return this.http.get<any>(`${API}/public/raffles/${slug}/board`);
   }
 
-  releasePublicTicket(slug: string, body: { folio: number; phone: string }): Observable<any> {
+  releasePublicTicket(slug: string, body: { folio: number; phone: string; code: string }): Observable<any> {
     return this.http.post<any>(`${API}/public/raffles/${slug}/release`, body);
+  }
+
+  checkMine(
+    slug: string,
+    tickets: { folio: number; code: string }[],
+  ): Observable<{ tickets: { folio: number; valid: boolean; status: string }[] }> {
+    return this.http.post<any>(`${API}/public/raffles/${slug}/mine`, { tickets });
   }
 
   claimTicket(

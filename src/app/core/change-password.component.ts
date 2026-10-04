@@ -215,7 +215,10 @@ export class ChangePasswordComponent {
     this.loading.set(true);
     this.error.set('');
     this.api.changePassword(this.current, this.next).subscribe({
-      next: () => {
+      next: (res) => {
+        // Las demás sesiones se cerraron en el servidor; esta sigue con tokens nuevos
+        localStorage.setItem('sn_token', res.access_token);
+        localStorage.setItem('sn_refresh', res.refresh_token);
         this.loading.set(false);
         this.toast.success('Contraseña actualizada', 'Tu contraseña se cambió correctamente ✅');
         this.close();
