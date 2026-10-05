@@ -19,7 +19,7 @@ import { CommonModule } from '@angular/common';
     <div class="scratch-wrap" #wrap>
       <div class="prize-side">
         <div class="label">Tu boleto cuesta</div>
-        <div class="amount">{{ isRevealed() ? '\$' + amount : '\$?' }}</div>
+        <div class="amount">{{ !isRevealed() ? '\$?' : amount > 0 ? '\$' + amount : '…' }}</div>
         <div class="pie">Paga este monto y asegura tu lugar</div>
       </div>
       <canvas #canvas id="scratchCanvas"></canvas>
@@ -29,8 +29,15 @@ import { CommonModule } from '@angular/common';
       <div class="progress-bar" [style.width.%]="progress()"></div>
     </div>
 
-    @if (isRevealed()) {
-      <div class="hint success">{{ isRevealed() ? '¡Tu boleto cuesta \$' + amount + '!' : 'Raspa para descubrir' }}</div>
+    @if (isRevealed() && failed) {
+      <div class="hint error">
+        No pudimos confirmar tu precio.
+        <button type="button" class="retry-btn" (click)="retry.emit()">Reintentar</button>
+      </div>
+    } @else if (isRevealed() && amount <= 0) {
+      <div class="hint">Revisando tu boleto…</div>
+    } @else if (isRevealed()) {
+      <div class="hint success">¡Tu boleto cuesta \${{ amount }}!</div>
     } @else {
       <div class="hint">Raspa con el dedo la zona plateada ✨</div>
     }
@@ -121,6 +128,19 @@ import { CommonModule } from '@angular/common';
         min-height: 20px;
         line-height: 1.45;
       }
+      .hint.error {
+        color: #b3261e;
+      }
+      .retry-btn {
+        margin-left: 8px;
+        padding: 4px 12px;
+        border: 1px solid #b3261e;
+        border-radius: 999px;
+        background: #fff;
+        color: #b3261e;
+        font-weight: 700;
+        cursor: pointer;
+      }
       .hint.success {
         color: #1b5e20;
         font-weight: 700;
@@ -136,7 +156,12 @@ import { CommonModule } from '@angular/common';
 })
 export class ScratchCardComponent implements AfterViewInit, OnDestroy {
   @Input() amount = 0;
+  /** El servidor no pudo confirmar el monto: se ofrece reintentar en vez de dejar "$0". */
+  @Input() failed = false;
+  /** Boleto que ya se raspó antes: se muestra descubierto, sin pedir raspar otra vez. */
+  @Input() preRevealed = false;
   @Output() revealed = new EventEmitter<void>();
+  @Output() retry = new EventEmitter<void>();
 
   @ViewChild('canvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('wrap', { static: true }) wrapRef!: ElementRef<HTMLDivElement>;
@@ -161,6 +186,10 @@ export class ScratchCardComponent implements AfterViewInit, OnDestroy {
   private _onTouchEnd = () => this.terminar();
 
   ngAfterViewInit() {
+    if (this.preRevealed) {
+      this.revelarYa();
+      return;
+    }
     // Doble frame para layout estable
     requestAnimationFrame(() => requestAnimationFrame(() => this.preparar()));
     this.resizeObserver = new ResizeObserver(() => {

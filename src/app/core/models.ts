@@ -22,7 +22,7 @@ export interface Raffle {
   price_min: number;
   price_max: number;
   ticket_count: number;
-  status: 'draft' | 'open' | 'closed' | 'drawn';
+  status: 'draft' | 'open' | 'closed' | 'drawing' | 'drawn';
   draw_date?: string | null;
   notes?: string | null;
   created_at: string;
@@ -60,6 +60,7 @@ export interface Ticket {
   registered_at?: string | null;
   scratched_at?: string | null;
   paid_at?: string | null;
+  payment_reported_at?: string | null;
   updated_at: string;
 }
 

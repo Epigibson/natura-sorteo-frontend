@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from './api.service';
 import { ToastService } from './toast.service';
+import { AuthService } from './auth.service';
 
 @Component({
   selector: 'app-change-password',
@@ -185,6 +186,7 @@ export class ChangePasswordComponent {
   constructor(
     private api: ApiService,
     private toast: ToastService,
+    private auth: AuthService,
   ) {}
 
   show() {
@@ -217,8 +219,7 @@ export class ChangePasswordComponent {
     this.api.changePassword(this.current, this.next).subscribe({
       next: (res) => {
         // Las demás sesiones se cerraron en el servidor; esta sigue con tokens nuevos
-        localStorage.setItem('sn_token', res.access_token);
-        localStorage.setItem('sn_refresh', res.refresh_token);
+        this.auth.setTokens(res.access_token, res.refresh_token);
         this.loading.set(false);
         this.toast.success('Contraseña actualizada', 'Tu contraseña se cambió correctamente ✅');
         this.close();

@@ -111,7 +111,9 @@ type Paso = 'acceso' | 'registro' | 'raspa' | 'resultado' | 'ganador' | 'error-a
 
             <app-scratch-card
               [amount]="amount() || 0"
+              [failed]="scratchFailed()"
               (revealed)="onScratchRevealed()"
+              (retry)="onScratchRevealed()"
             />
 
             @if (revealed()) {
@@ -332,6 +334,7 @@ export class PlayComponent implements OnInit {
   phone = '';
   amount = signal(0);
   revealed = signal(false);
+  scratchFailed = signal(false);
   loading = signal(false);
   error = signal('');
   raffle = signal<PublicRaffle | null>(null);
@@ -448,7 +451,12 @@ export class PlayComponent implements OnInit {
   /** Se dispara cuando el canvas se raspa lo suficiente. */
   onScratchRevealed() {
     this.revealed.set(true);
-    // Obtener monto SOLO después de raspar (anti-trampa: no estaba en el DOM antes)
+    this.scratchFailed.set(false);
+    this.requestAmount(0);
+  }
+
+  /** Obtiene el monto SOLO después de raspar (anti-trampa). Reintenta ante fallos de red/servidor dormido. */
+  private requestAmount(attempt: number) {
     this.api
       .scratch({ folio: this.folio, code: this.code, raffle_slug: this.slug })
       .subscribe({
@@ -458,7 +466,13 @@ export class PlayComponent implements OnInit {
           setTimeout(() => this.paso.set('resultado'), 1100);
         },
         error: (err) => {
-          this.toast.error('Error', err?.error?.detail || 'No se pudo obtener el monto');
+          const transient = err?.status === 0 || err?.status >= 500;
+          if (transient && attempt < 2) {
+            setTimeout(() => this.requestAmount(attempt + 1), 2500 * (attempt + 1));
+            return;
+          }
+          this.scratchFailed.set(true);
+          this.toast.error('No se pudo obtener el monto', err?.error?.detail || 'Revisa tu conexión y toca Reintentar');
         },
       });
   }

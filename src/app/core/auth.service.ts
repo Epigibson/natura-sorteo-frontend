@@ -22,16 +22,25 @@ export class AuthService {
   }
 
   login(phone: string, password: string) {
-    return this.http.post<TokenOut>(`${API}/auth/login`, { phone, password }).pipe(
-      tap((res) => {
-        localStorage.setItem('sn_token', res.access_token);
-        localStorage.setItem('sn_refresh', res.refresh_token);
-        localStorage.setItem('sn_role', res.role);
-        localStorage.setItem('sn_name', res.name);
-        this.token.set(res.access_token);
-        this.user.set({ sub: '', role: res.role, name: res.name });
-      }),
-    );
+    return this.http
+      .post<TokenOut>(`${API}/auth/login`, { phone, password })
+      .pipe(tap((res) => this.setTokens(res.access_token, res.refresh_token, res.role, res.name)));
+  }
+
+  /**
+   * Guarda una sesión nueva (login, refresh o cambio de contraseña) y mantiene sincronizados
+   * localStorage y las señales. Si llegan rol/nombre (login y refresh) también se actualizan,
+   * así un cambio de rol en el servidor se refleja sin volver a iniciar sesión.
+   */
+  setTokens(access: string, refresh: string, role?: string, name?: string) {
+    localStorage.setItem('sn_token', access);
+    localStorage.setItem('sn_refresh', refresh);
+    this.token.set(access);
+    if (role !== undefined) {
+      localStorage.setItem('sn_role', role);
+      localStorage.setItem('sn_name', name ?? '');
+      this.user.set({ sub: '', role, name: name ?? '' });
+    }
   }
 
   refreshToken() {

@@ -7,6 +7,8 @@ import { ScratchCardComponent } from '../../core/scratch-card.component';
 import { BankDataComponent } from '../../core/bank-data.component';
 import { bankDataText } from '../../core/bank-data';
 import { ToastService } from '../../core/toast.service';
+import { ModalService } from '../../core/modal.service';
+import { firstValueFrom } from 'rxjs';
 
 interface BoardCard {
   folio: number;
@@ -21,6 +23,7 @@ interface BoardData {
   price_min: number;
   price_max: number;
   ticket_count: number;
+  max_tickets_per_person?: number;
   status: string;
   drawn: boolean;
   winner_folio: number | null;
@@ -73,8 +76,11 @@ interface BoardData {
             @for (folio of getClaimedFoliosArray(); track folio) {
               <div class="ss-card-wrap">
                 <app-scratch-card
-                  [amount]="amountMap[folio] || 0"
-                  (revealed)="onTicketScratched({ folio: folio, amount: amountMap[folio] || 0 })"
+                  [amount]="getAmountForFolio(folio)"
+                  [preRevealed]="isScratched(folio)"
+                  [failed]="scratchFailed().has(folio)"
+                  (revealed)="onTicketScratched({ folio: folio, amount: 0 })"
+                  (retry)="onTicketScratched({ folio: folio, amount: 0 })"
                 />
                 <div class="ss-folio-label">Folio {{ pad(folio) }}</div>
               </div>
@@ -99,6 +105,12 @@ interface BoardData {
               <app-bank-data />
 
               <button class="btn-wa-big" (click)="sendAllWhatsApp()">📲 Enviar a la organizadora por WhatsApp</button>
+              @if (paidReported()) {
+                <p class="ss-pay-hint">✅ Ya avisamos a la organizadora que pagaste. Ella confirmará tu pago.</p>
+              } @else {
+                <button class="btn-paid-report" (click)="reportPaid()">✅ Ya pagué</button>
+                <p class="paid-hint">Úsalo solo después de transferir: así tu boleto no se libera mientras se confirma.</p>
+              }
             </div>
           }
 
@@ -536,6 +548,23 @@ interface BoardData {
         text-align: center;
         margin: 16px 0 12px;
       }
+      .btn-paid-report {
+        width: 100%;
+        margin-top: 10px;
+        padding: 12px;
+        border: 2px solid #1b5e20;
+        border-radius: 12px;
+        background: #fff;
+        color: #1b5e20;
+        font-weight: 800;
+        cursor: pointer;
+      }
+      .paid-hint {
+        margin: 6px 0 0;
+        font-size: 12px;
+        color: #6b7280;
+        text-align: center;
+      }
       .btn-wa-big {
         width: 100%;
         padding: 16px;
@@ -770,6 +799,16 @@ export class BoardComponent implements OnInit, OnDestroy {
   claimedFolios = new Set<number>();
   claimedCodes: Record<number, string> = {};
   scratchMode = signal(false);
+  scratchFailed = signal<Set<number>>(new Set());
+  paidReported = signal(false);
+  claimingBusy = false;
+
+  private setScratchFailed(folio: number, on: boolean) {
+    const next = new Set(this.scratchFailed());
+    if (on) next.add(folio);
+    else next.delete(folio);
+    this.scratchFailed.set(next);
+  }
 
   saveClaimedState() {
     const key = 'sn_claimed_' + this.slug;
@@ -807,6 +846,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     private router: Router,
     private api: ApiService,
     private toast: ToastService,
+    private modal: ModalService,
   ) {}
 
   private syncTimer: any = null;
@@ -864,12 +904,16 @@ export class BoardComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** El servidor baraja los folios en cada petición; ordenarlos evita que el tablero "salte" bajo el dedo. */
+  private sorted(cards: BoardCard[]): BoardCard[] {
+    return [...cards].sort((a, b) => a.folio - b.folio);
+  }
+
   refreshBoard() {
     this.api.getBoard(this.slug).subscribe({
       next: (d: any) => {
         this.data.set(d);
-        // conservar visualmente como 'registered' lo que el participante tiene localmente
-        this.cards.set(d.cards);
+        this.cards.set(this.sorted(d.cards));
       },
       error: () => {},
     });
@@ -878,6 +922,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.slug = this.route.snapshot.paramMap.get('slug') || '';
     this.loadClaimedState();
+    this.paidReported.set(localStorage.getItem('sn_paidrep_' + this.slug) === '1');
     if (!this.syncTimer) {
       this.syncTimer = setInterval(() => this.syncMine(), 60000);
       document.addEventListener('visibilitychange', this.onVisible);
@@ -885,7 +930,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.api.getBoard(this.slug).subscribe({
       next: (d: any) => {
         this.data.set(d);
-        this.cards.set(d.cards);
+        this.cards.set(this.sorted(d.cards));
         this.loading.set(false);
         this.syncMine();
       },
@@ -930,6 +975,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   selectCard(c: BoardCard) {
+    if (this.claiming() || this.claimingBusy) return; // evita dobles toques
     // Si ya es mío, ir a raspar
     if (this.claimedFolios.has(c.folio)) {
       this.goScratchMode();
@@ -947,9 +993,9 @@ export class BoardComponent implements OnInit, OnDestroy {
       this.toast.warning('Boleto tomado', 'El folio ' + this.pad(c.folio) + ' ya lo tiene alguien.');
       return;
     }
-    // Validar límite
-    const maxPp = (this.data() as any)?.max_tickets_per_person || 3;
-    if (this.claimedFolios.size >= maxPp) {
+    // Validar límite (0 = sin límite; si el servidor no lo informa, 3)
+    const maxPp = this.data()?.max_tickets_per_person ?? 3;
+    if (maxPp > 0 && this.claimedFolios.size >= maxPp) {
       this.toast.warning('Límite alcanzado', 'Ya tienes ' + maxPp + ' boletos. Máximo permitido.');
       return;
     }
@@ -957,9 +1003,22 @@ export class BoardComponent implements OnInit, OnDestroy {
     const savedName = localStorage.getItem('sn_name_' + this.slug);
     const savedPhone = localStorage.getItem('sn_phone_' + this.slug);
     if (savedName && savedPhone) {
-      this.regName = savedName;
-      this.regPhone = savedPhone;
-      this.claimTicket(c);  // Pasar card directo, sin abrir modal
+      // Ya tenemos sus datos: pedir confirmación en vez de apartar el folio con un solo toque
+      this.claimingBusy = true;
+      this.modal
+        .confirm({
+          title: '¿Apartar el folio ' + this.pad(c.folio) + '?',
+          message: 'Se apartará a nombre de ' + savedName + '. Podrás soltarlo mientras no lo hayas raspado.',
+          confirmLabel: 'Sí, apartar',
+          cancelLabel: 'No',
+        })
+        .then((ok) => {
+          this.claimingBusy = false;
+          if (!ok) return;
+          this.regName = savedName;
+          this.regPhone = savedPhone;
+          this.claimTicket(c);
+        });
       return;
     }
     this.selected.set(c);
@@ -969,6 +1028,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   toggleCard(card: BoardCard) {
+    if (this.claiming() || this.claimingBusy) return;
     if (this.claimedFolios.has(card.folio)) {
       // No permitir deseleccionar si YA FUE RASPADO (este boleto específico)
       const thisScratched = this.scratchedResults().some(r => r.folio === card.folio);
@@ -976,7 +1036,20 @@ export class BoardComponent implements OnInit, OnDestroy {
         this.toast.info('Ya raspado', 'El folio ' + this.pad(card.folio) + ' ya fue raspado, no se puede quitar');
         return;
       }
-      this.deselectTicket(card);  // Toggle OFF
+      // Soltar un folio es irreversible (el código cambia): pedir confirmación
+      this.claimingBusy = true;
+      this.modal
+        .confirm({
+          title: '¿Soltar el folio ' + this.pad(card.folio) + '?',
+          message: 'Volverá a quedar disponible para otras personas y perderás tu lugar.',
+          confirmLabel: 'Sí, soltar',
+          cancelLabel: 'No, conservarlo',
+          variant: 'danger',
+        })
+        .then((ok) => {
+          this.claimingBusy = false;
+          if (ok) this.deselectTicket(card);
+        });
     } else {
       this.selectCard(card);  // Toggle ON — permitido incluso si ya raspó otros
     }
@@ -1007,8 +1080,8 @@ export class BoardComponent implements OnInit, OnDestroy {
       return;
     }
     this.scratchMode.set(true);
-    this.scratchedResults.set([]);
-    this.allScratched.set(false);
+    // No se borra lo ya raspado: esos boletos se muestran descubiertos
+    this.allScratched.set(this.scratchedResults().length >= this.claimedFolios.size);
   }
 
   exitScratchMode() {
@@ -1016,27 +1089,60 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   onTicketScratched(result: { folio: number; amount: number }) {
-    // Obtener el monto real del backend
     const code = this.claimedCodes[result.folio];
-    if (code) {
-      this.api.scratch({ folio: result.folio, code, raffle_slug: this.slug }).subscribe({
-        next: (res) => {
-          this.amountMap[result.folio] = res.amount;
-          this.saveClaimedState();
-          const realResult = { folio: result.folio, amount: res.amount };
-          const results = [...this.scratchedResults().filter(r => r.folio !== result.folio), realResult];
-          this.scratchedResults.set(results);
-          if (results.length >= this.claimedFolios.size) {
-            this.allScratched.set(true);
-          }
-        },
-      });
+    if (!code) {
+      this.setScratchFailed(result.folio, true);
+      this.toast.error('Error', 'No se encontró el código de este boleto');
+      return;
+    }
+    this.setScratchFailed(result.folio, false);
+    this.requestScratch(result.folio, code, 0);
+  }
+
+  /** Pide el monto al servidor; reintenta solo ante fallos de red/servidor y ofrece "Reintentar" si no se logra. */
+  private requestScratch(folio: number, code: string, attempt: number) {
+    this.api.scratch({ folio, code, raffle_slug: this.slug }).subscribe({
+      next: (res) => {
+        this.amountMap[folio] = res.amount;
+        const results = [...this.scratchedResults().filter(r => r.folio !== folio), { folio, amount: res.amount }];
+        this.scratchedResults.set(results);
+        this.saveClaimedState(); // después de actualizar: antes guardaba el estado anterior
+        if (results.length >= this.claimedFolios.size) {
+          this.allScratched.set(true);
+        }
+      },
+      error: (err) => {
+        const transient = err?.status === 0 || err?.status >= 500; // sin red o servidor despertando
+        if (transient && attempt < 2) {
+          setTimeout(() => this.requestScratch(folio, code, attempt + 1), 2500 * (attempt + 1));
+          return;
+        }
+        this.setScratchFailed(folio, true);
+        this.toast.error('No se pudo revelar el monto', err?.error?.detail || 'Revisa tu conexión y toca Reintentar');
+      },
+    });
+  }
+
+  /** "Ya pagué": avisa a la organizadora y pausa la liberación automática de estos boletos. */
+  async reportPaid() {
+    const ok = await this.modal.confirm({
+      title: '¿Ya hiciste tu pago?',
+      message: 'Avisaremos a la organizadora para que confirme tu pago y tu boleto no se libere. Úsalo solo si ya transferiste.',
+      confirmLabel: 'Sí, ya pagué',
+      cancelLabel: 'Todavía no',
+    });
+    if (!ok) return;
+    const results = await Promise.allSettled(
+      Array.from(this.claimedFolios).map(folio =>
+        firstValueFrom(this.api.reportPaid(this.slug, { folio, code: this.claimedCodes[folio] || '' })),
+      ),
+    );
+    if (results.every(r => r.status === 'fulfilled')) {
+      localStorage.setItem('sn_paidrep_' + this.slug, '1');
+      this.paidReported.set(true);
+      this.toast.success('Listo', 'Avisamos a la organizadora. Confirmará tu pago pronto.');
     } else {
-      const results = [...this.scratchedResults(), result];
-      this.scratchedResults.set(results);
-      if (results.length >= this.claimedFolios.size) {
-        this.allScratched.set(true);
-      }
+      this.toast.error('No se pudo avisar', 'Intenta de nuevo o mándale tu captura por WhatsApp.');
     }
   }
 
@@ -1111,7 +1217,7 @@ export class BoardComponent implements OnInit, OnDestroy {
         // Si ya fue tomado, recargar el tablero
         if (String(err?.error?.detail || '').includes('tomado')) {
           this.selected.set(null);
-          this.ngOnInit();
+          this.refreshBoard();
         }
       },
     });

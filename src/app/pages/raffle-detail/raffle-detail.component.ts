@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -32,18 +32,25 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
                 <a class="btn-sm btn-open" [href]="boardUrl()" target="_blank">👁 Ver tablero</a>
                 <button class="btn-sm btn-copy" (click)="copyLandingLink()">📋 Landing</button>
                 <a class="btn-sm btn-open" [href]="landingUrl()" target="_blank">👁 Ver landing</a>
-                <button class="btn-sm btn-copy" (click)="editRaffle()">✏️ Editar</button>
+                @if (isAdmin()) {
+                  <button class="btn-sm btn-copy" (click)="editRaffle()">✏️ Editar</button>
+                }
                 <button class="btn-sm btn-open" (click)="exportBackup()">💾 Backup</button>
                 <button class="btn-sm btn-open" (click)="showQR()">📱 QR</button>
-                <button class="btn-sm btn-danger" (click)="deleteRaffle()">🗑️ Eliminar</button>
+                @if (isAdmin()) {
+                  <button class="btn-sm btn-danger" (click)="deleteRaffle()">🗑️ Eliminar</button>
+                }
               </div>
             </div>
           </div>
           <div class="head-actions">
-            @if (r.status === 'open') {
+            @if (isAdmin() && r.status === 'open') {
               <button class="btn-ghost" (click)="closeRaffle()">Cerrar venta</button>
             }
-            @if (r.status !== 'drawn') {
+            @if (isAdmin() && r.status === 'closed') {
+              <button class="btn-ghost" (click)="reopenRaffle()">Reabrir venta</button>
+            }
+            @if (isAdmin() && r.status !== 'drawn') {
               <button class="btn-primary" (click)="draw()" [disabled]="(stats()?.paid || 0) === 0">
                 🎲 Sortear premio
               </button>
@@ -142,6 +149,9 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
                     <span class="tel">{{ t.participant?.phone }}</span>
                   }
                   <span class="st-label">{{ statusLabel(t.status) }}</span>
+                  @if (t.payment_reported_at && t.status !== 'paid') {
+                    <span class="reported">💬 Avisó que ya pagó</span>
+                  }
                 </div>
               </div>
               <div class="t-actions">
@@ -149,19 +159,19 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
                   <button class="btn-sm" (click)="openAssign(t)">Entregar</button>
                 }
                 @if (t.status === 'delivered' || t.status === 'registered' || t.status === 'scratched') {
-                  <button class="btn-sm btn-pay" (click)="pay(t)">Cobrar</button>
+                  <button class="btn-sm btn-pay" (click)="pay(t)" [disabled]="busyFolios().has(t.folio)">Cobrar</button>
                   <button class="btn-sm btn-wa" (click)="sendReminder(t)" title="Recordar pago">
                     ⏰
                   </button>
                   <button class="btn-sm btn-wa" (click)="sendWhatsApp(t)" title="Enviar por WhatsApp">
                     📲
                   </button>
-                  <button class="btn-sm btn-danger" (click)="release(t)">Liberar</button>
+                  <button class="btn-sm btn-danger" (click)="release(t)" [disabled]="busyFolios().has(t.folio)">Liberar</button>
                 }
                 @if (t.status === 'paid') {
                   <span class="ok">✅</span>
                   @if (auth.user()?.role === 'admin' && raffle()?.status !== 'drawn') {
-                    <button class="btn-sm btn-danger" (click)="unpay(t)" title="Deshacer pago marcado por error">
+                    <button class="btn-sm btn-danger" (click)="unpay(t)" [disabled]="busyFolios().has(t.folio)" title="Deshacer pago marcado por error">
                       Deshacer pago
                     </button>
                   }
@@ -664,6 +674,15 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
         font-size: 12px;
         color: #6b7280;
       }
+      .reported {
+        margin-left: 6px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: #fff8e1;
+        color: #8d6e00;
+        font-size: 12px;
+        font-weight: 700;
+      }
       .st-label {
         font-size: 11px;
         font-weight: 700;
@@ -941,6 +960,22 @@ export class RaffleDetailComponent implements OnInit {
   drawSpinning = signal(false);
 
   private raffleId = '';
+  readonly isAdmin = computed(() => this.auth.user()?.role === 'admin');
+  /** Folios con una acción en curso: evita dobles clics en Cobrar/Liberar/Deshacer. */
+  readonly busyFolios = signal<Set<number>>(new Set());
+
+  private setBusy(folio: number, on: boolean) {
+    const next = new Set(this.busyFolios());
+    if (on) next.add(folio);
+    else next.delete(folio);
+    this.busyFolios.set(next);
+  }
+
+  /** wa.me necesita lada de país; los teléfonos se guardan con 10 dígitos (México). */
+  private waPhone(phone?: string | null): string {
+    const tel = (phone || '').replace(/\D/g, '');
+    return tel.length === 10 ? '52' + tel : tel;
+  }
 
   constructor(
     private route: ActivatedRoute,
@@ -979,6 +1014,7 @@ export class RaffleDetailComponent implements OnInit {
         released: 'Liberado',
         open: 'Abierto',
         closed: 'Cerrado',
+        drawing: 'Sorteando…',
         drawn: 'Sorteado',
         draft: 'Borrador',
       }[s] || s
@@ -1028,13 +1064,20 @@ export class RaffleDetailComponent implements OnInit {
       required: false,
     });
     if (note === null) return; // canceló el diálogo: no se cobra
-    this.api.markPaid(this.raffleId, t.folio, note || undefined).subscribe({
+    if (this.busyFolios().has(t.folio)) return;
+    this.setBusy(t.folio, true);
+    // Se manda el teléfono que se ve en pantalla: si el boleto cambió de dueño, el servidor no cobra
+    this.api.markPaid(this.raffleId, t.folio, note || undefined, t.participant?.phone || undefined).subscribe({
       next: () => {
+        this.setBusy(t.folio, false);
         this.toast.success('Pago registrado', `Folio ${t.folio} marcado como pagado ✅`);
         this.reload();
       },
-      error: (err) =>
-        this.toast.error('Error al cobrar', err?.error?.detail || 'Intenta de nuevo'),
+      error: (err) => {
+        this.setBusy(t.folio, false);
+        this.toast.error('Error al cobrar', err?.error?.detail || 'Intenta de nuevo');
+        this.reload();
+      },
     });
   }
 
@@ -1049,14 +1092,18 @@ export class RaffleDetailComponent implements OnInit {
       confirmLabel: 'Deshacer pago',
       required: false,
     });
-    if (reason === null) return;
+    if (reason === null || this.busyFolios().has(t.folio)) return;
+    this.setBusy(t.folio, true);
     this.api.unpayTicket(this.raffleId, t.folio, reason || undefined).subscribe({
       next: () => {
+        this.setBusy(t.folio, false);
         this.toast.info('Pago deshecho', `Folio ${t.folio} ya no cuenta como pagado`);
         this.reload();
       },
-      error: (err) =>
-        this.toast.error('No se pudo deshacer', err?.error?.detail || 'Intenta de nuevo'),
+      error: (err) => {
+        this.setBusy(t.folio, false);
+        this.toast.error('No se pudo deshacer', err?.error?.detail || 'Intenta de nuevo');
+      },
     });
   }
 
@@ -1070,14 +1117,19 @@ export class RaffleDetailComponent implements OnInit {
       cancelLabel: 'No, volver',
       variant: 'danger',
     });
-    if (!ok) return;
-    this.api.releaseTicket(this.raffleId, t.folio).subscribe({
+    if (!ok || this.busyFolios().has(t.folio)) return;
+    this.setBusy(t.folio, true);
+    this.api.releaseTicket(this.raffleId, t.folio, t.participant?.phone || undefined).subscribe({
       next: () => {
+        this.setBusy(t.folio, false);
         this.toast.info('Boleto liberado', `Folio ${t.folio} ya está disponible con código nuevo`);
         this.reload();
       },
-      error: (err) =>
-        this.toast.error('Error al liberar', err?.error?.detail || 'Intenta de nuevo'),
+      error: (err) => {
+        this.setBusy(t.folio, false);
+        this.toast.error('Error al liberar', err?.error?.detail || 'Intenta de nuevo');
+        this.reload();
+      },
     });
   }
 
@@ -1128,7 +1180,7 @@ export class RaffleDetailComponent implements OnInit {
     }
 
     waUrl = tel
-      ? 'https://wa.me/52' + tel + '?text=' + encodeURIComponent(mensaje)
+      ? 'https://wa.me/' + this.waPhone(tel) + '?text=' + encodeURIComponent(mensaje)
       : 'https://wa.me/?text=' + encodeURIComponent(mensaje);
 
     window.open(waUrl, '_blank');
@@ -1136,6 +1188,23 @@ export class RaffleDetailComponent implements OnInit {
       'WhatsApp abierto - folio ' + t.folio,
       tel ? 'Mensaje listo para ' + (t.participant?.name || 'el participante') : 'Elige el contacto',
     );
+  }
+
+  async reopenRaffle() {
+    const ok = await this.modal.confirm({
+      title: '¿Reabrir la venta?',
+      message: 'Se podrán volver a apartar y entregar boletos.',
+      confirmLabel: 'Reabrir venta',
+      cancelLabel: 'Cancelar',
+    });
+    if (!ok) return;
+    this.api.reopenRaffle(this.raffleId).subscribe({
+      next: () => {
+        this.toast.success('Venta reabierta', 'Ya se pueden apartar boletos otra vez');
+        this.reload();
+      },
+      error: (err) => this.toast.error('No se pudo reabrir', err?.error?.detail || 'Intenta de nuevo'),
+    });
   }
 
   async closeRaffle() {
@@ -1189,9 +1258,27 @@ export class RaffleDetailComponent implements OnInit {
           this.reload();
         },
         error: (err) => {
-          this.drawSpinning.set(false);
-          this.drawOpen.set(false);
-          this.toast.error('Error al sortear', err?.error?.detail || 'Intenta de nuevo');
+          // La respuesta pudo perderse (red, servidor dormido) aunque el sorteo SÍ se hizo:
+          // consultar el estado real antes de decir que falló.
+          this.api.getRaffle(this.raffleId).subscribe({
+            next: (r) => {
+              this.drawSpinning.set(false);
+              this.raffle.set(r);
+              if (r.status === 'drawn' && r.winner) {
+                this.drawResult.set(r.winner);
+                this.toast.success('🏆 ¡Tenemos ganador!', `Folio ${r.winner.folio}`);
+                this.reload();
+              } else {
+                this.drawOpen.set(false);
+                this.toast.error('Error al sortear', err?.error?.detail || 'Intenta de nuevo');
+              }
+            },
+            error: () => {
+              this.drawSpinning.set(false);
+              this.drawOpen.set(false);
+              this.toast.error('Error al sortear', 'Revisa tu conexión y recarga la página para ver el resultado');
+            },
+          });
         },
       });
     }, 3000);
@@ -1345,12 +1432,13 @@ export class RaffleDetailComponent implements OnInit {
       (p ? 'Hola ' + p + '! ' : 'Hola! ') +
       'Recordatorio: tu boleto *folio ' + t.folio + '* de la rifa *' + (r?.title || '') + '* ' +
       'aun no esta pagado.\n\n' +
-      'Monto: *$' + t.amount + '*\n' +
+      // el monto solo se menciona si ya lo raspó: antes arruinaría la sorpresa
+      (t.status === 'scratched' ? 'Monto: *$' + t.amount + '*\n' : '') +
       'Para asegurar tu lugar en el sorteo, realiza tu pago con estos datos:\n\n' +
       bankDataText() + '\n\n' +
       'Mandame la captura cuando lo hagas. Cualquier duda, escribeme. Suerte!';
     const tel = (t.participant?.phone || '').replace(/\D/g, '');
-    const waUrl = tel ? 'https://wa.me/52' + tel + '?text=' + encodeURIComponent(msg) : 'https://wa.me/?text=' + encodeURIComponent(msg);
+    const waUrl = tel ? 'https://wa.me/' + this.waPhone(tel) + '?text=' + encodeURIComponent(msg) : 'https://wa.me/?text=' + encodeURIComponent(msg);
     window.open(waUrl, '_blank');
     this.toast.info('Recordatorio abierto', 'Folio ' + t.folio);
   }

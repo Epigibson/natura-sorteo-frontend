@@ -57,10 +57,10 @@ export class ApiService {
     );
   }
 
-  markPaid(raffleId: string, folio: number, note?: string): Observable<Ticket> {
+  markPaid(raffleId: string, folio: number, note?: string, expectedPhone?: string): Observable<Ticket> {
     return this.http.post<Ticket>(
       `${API}/raffles/${raffleId}/tickets/${folio}/pay`,
-      { note },
+      { note, expected_phone: expectedPhone },
     );
   }
 
@@ -71,11 +71,15 @@ export class ApiService {
     );
   }
 
-  releaseTicket(raffleId: string, folio: number): Observable<Ticket> {
+  releaseTicket(raffleId: string, folio: number, expectedPhone?: string): Observable<Ticket> {
     return this.http.post<Ticket>(
       `${API}/raffles/${raffleId}/tickets/${folio}/release`,
-      {},
+      { expected_phone: expectedPhone },
     );
+  }
+
+  reopenRaffle(id: string): Observable<Raffle> {
+    return this.http.post<Raffle>(`${API}/raffles/${id}/reopen`, {});
   }
 
   closeRaffle(id: string): Observable<Raffle> {
@@ -156,6 +160,10 @@ export class ApiService {
     tickets: { folio: number; code: string }[],
   ): Observable<{ tickets: { folio: number; valid: boolean; status: string }[] }> {
     return this.http.post<any>(`${API}/public/raffles/${slug}/mine`, { phone, tickets });
+  }
+
+  reportPaid(slug: string, body: { folio: number; code: string }): Observable<any> {
+    return this.http.post<any>(`${API}/public/raffles/${slug}/paid-report`, body);
   }
 
   claimTicket(
