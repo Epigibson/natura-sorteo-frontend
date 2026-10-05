@@ -152,9 +152,10 @@ export class ApiService {
 
   checkMine(
     slug: string,
+    phone: string,
     tickets: { folio: number; code: string }[],
   ): Observable<{ tickets: { folio: number; valid: boolean; status: string }[] }> {
-    return this.http.post<any>(`${API}/public/raffles/${slug}/mine`, { tickets });
+    return this.http.post<any>(`${API}/public/raffles/${slug}/mine`, { phone, tickets });
   }
 
   claimTicket(

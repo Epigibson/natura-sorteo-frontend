@@ -826,12 +826,15 @@ export class BoardComponent implements OnInit, OnDestroy {
   syncMine() {
     const folios = Array.from(this.claimedFolios);
     if (folios.length === 0) return;
+    // El servidor exige el teléfono del titular (junto al código) para confirmar un boleto
+    const phone = (localStorage.getItem('sn_phone_' + this.slug) || '').replace(/\D/g, '');
+    if (phone.length < 10) return;
     const tickets = folios
       .filter(f => this.claimedCodes[f])
       .map(f => ({ folio: f, code: this.claimedCodes[f] }));
     // Folios sin código guardado no se pueden verificar ni usar: se limpian
     const orphans = folios.filter(f => !this.claimedCodes[f]);
-    this.api.checkMine(this.slug, tickets).subscribe({
+    this.api.checkMine(this.slug, phone, tickets).subscribe({
       next: (res) => {
         const lost = [...orphans, ...res.tickets.filter(t => !t.valid).map(t => t.folio)];
         if (lost.length === 0) return;
