@@ -21,7 +21,9 @@ import { Raffle } from '../../core/models';
           <span class="user">Hola, {{ auth.user()?.name || 'Yuri' }}</span>
           <button class="btn-ghost" (click)="pwd.show()" title="Cambiar contraseña">🔒</button>
           <button class="btn-ghost" (click)="auth.logout()">Salir</button>
-          <a routerLink="/participantes" class="btn-ghost">👥</a>
+          @if (auth.user()?.role === 'admin') {
+            <a routerLink="/participantes" class="btn-ghost">👥</a>
+          }
           @if (auth.user()?.role === 'admin') {
             <a routerLink="/sorteos/nuevo" class="btn-primary">+ Nuevo sorteo</a>
           }

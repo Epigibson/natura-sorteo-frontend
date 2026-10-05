@@ -35,7 +35,9 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
                 @if (isAdmin()) {
                   <button class="btn-sm btn-copy" (click)="editRaffle()">✏️ Editar</button>
                 }
-                <button class="btn-sm btn-open" (click)="exportBackup()">💾 Backup</button>
+                @if (isAdmin()) {
+                  <button class="btn-sm btn-open" (click)="exportBackup()">💾 Backup</button>
+                }
                 <button class="btn-sm btn-open" (click)="showQR()">📱 QR</button>
                 @if (isAdmin()) {
                   <button class="btn-sm btn-danger" (click)="deleteRaffle()">🗑️ Eliminar</button>
