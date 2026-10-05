@@ -29,6 +29,8 @@ interface BoardData {
   winner_folio: number | null;
   paid_count: number;
   free_count: number;
+  participating_folios?: number[];
+  drawn_at?: string | null;
   cards: BoardCard[];
 }
 
@@ -164,6 +166,37 @@ interface BoardData {
               </button>
             }
           </div>
+        }
+      }
+
+      <!-- TRANSPARENCIA: folios que participan en el sorteo -->
+      @if (!scratchMode() && !loading() && data(); as d) {
+        @if ((d.participating_folios?.length || 0) > 0) {
+          <section class="participating">
+            @if (d.drawn) {
+              <h3>🔎 Así se hizo el sorteo</h3>
+              <p class="p-sub">
+                Participaron <strong>{{ d.participating_folios!.length }}</strong> folios pagados
+                @if (d.drawn_at) { el {{ d.drawn_at | date: 'd/M/yyyy, h:mm a' }} }.
+                Ganó el folio <strong>{{ pad(d.winner_folio || 0) }}</strong>.
+              </p>
+            } @else {
+              <h3>🎟️ Folios que participan en el sorteo</h3>
+              <p class="p-sub">
+                <strong>{{ d.participating_folios!.length }}</strong> folios pagados hasta ahora.
+                Si ya pagaste y tu folio no aparece, avisa a la organizadora antes del sorteo.
+              </p>
+            }
+            <div class="p-chips">
+              @for (f of d.participating_folios!; track f) {
+                <span
+                  class="p-chip"
+                  [class.p-mine]="claimedFolios.has(f)"
+                  [class.p-winner]="d.drawn && d.winner_folio === f"
+                >{{ pad(f) }}</span>
+              }
+            </div>
+          </section>
         }
       }
 
@@ -548,6 +581,29 @@ interface BoardData {
         text-align: center;
         margin: 16px 0 12px;
       }
+      .participating {
+        margin: 18px auto 0;
+        max-width: 720px;
+        padding: 16px;
+        border-radius: 16px;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+      }
+      .participating h3 { margin: 0 0 6px; font-size: 16px; color: #1b5e20; }
+      .participating .p-sub { margin: 0 0 12px; font-size: 13px; color: #4b5563; }
+      .p-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+      .p-chip {
+        min-width: 34px;
+        padding: 4px 8px;
+        border-radius: 8px;
+        background: #f1f8f2;
+        color: #1b5e20;
+        font-weight: 700;
+        font-size: 13px;
+        text-align: center;
+      }
+      .p-chip.p-mine { outline: 2px solid #c9a227; }
+      .p-chip.p-winner { background: #c9a227; color: #fff; }
       .btn-paid-report {
         width: 100%;
         margin-top: 10px;
