@@ -6,7 +6,7 @@ import { ApiService } from '../../core/api.service';
 import { ToastService } from '../../core/toast.service';
 import { ScratchCardComponent } from '../../core/scratch-card.component';
 import { BankDataComponent } from '../../core/bank-data.component';
-import { BANK_DATA } from '../../core/bank-data';
+import { BANK_DATA, organizerWaUrl } from '../../core/bank-data';
 import { AccessCheck, PublicRaffle } from '../../core/models';
 
 type Paso = 'acceso' | 'registro' | 'raspa' | 'resultado' | 'ganador' | 'error-acceso';
@@ -491,7 +491,7 @@ export class PlayComponent implements OnInit {
       `Cuenta: ${BANK_DATA.accountNumber}\n` +
       `CLABE: ${BANK_DATA.clabe}\n` +
       `Tarjeta: ${BANK_DATA.cardNumber}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+    window.open(organizerWaUrl(texto), '_blank');
   }
 
   minPrice() {

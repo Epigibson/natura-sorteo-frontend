@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { ScratchCardComponent } from '../../core/scratch-card.component';
 import { BankDataComponent } from '../../core/bank-data.component';
-import { bankDataText } from '../../core/bank-data';
+import { bankDataText, organizerWaUrl } from '../../core/bank-data';
 import { ToastService } from '../../core/toast.service';
 import { ModalService } from '../../core/modal.service';
 import { firstValueFrom } from 'rxjs';
@@ -1217,7 +1217,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     msg += '\n💰 Total: $' + results.reduce((a, r2) => a + r2.amount, 0);
     msg += '\n\n' + bankDataText() + '\n\n';
     msg += 'Voy a pagar y te mando la captura. Por favor confirma mis boletos. ¡Gracias! 🍀';
-    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+    window.open(organizerWaUrl(msg), '_blank');
     this.toast.success('WhatsApp abierto', 'Envía el mensaje a la organizadora');
   }
 
