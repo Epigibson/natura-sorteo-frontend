@@ -30,3 +30,16 @@ textarea {
 a {
   color: #1b5e20;
 }
+
+/* Confetti del escenario de sorteo (elementos anexados a <body>) */
+.ds-confetti {
+  position: fixed;
+  top: -16px;
+  z-index: 30000;
+  pointer-events: none;
+  animation: ds-fall linear forwards;
+}
+@keyframes ds-fall {
+  0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+  100% { opacity: 0; transform: translateY(106vh) rotate(720deg); }
+}

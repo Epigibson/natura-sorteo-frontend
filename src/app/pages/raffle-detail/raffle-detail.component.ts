@@ -7,12 +7,13 @@ import { AuthService } from '../../core/auth.service';
 import { ToastService } from '../../core/toast.service';
 import { ModalService } from '../../core/modal.service';
 import { bankDataText } from '../../core/bank-data';
+import { DrawStageComponent, DrawWinner } from '../../core/draw-stage.component';
 import { Raffle, RaffleStats, Ticket } from '../../core/models';
 
 @Component({
   selector: 'app-raffle-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, DrawStageComponent],
   template: `
     @if (raffle(); as r) {
       <div class="page">
@@ -205,30 +206,17 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
           </div>
         }
 
-        <!-- Modal SORTEO animado -->
-        @if (drawOpen()) {
-          <div class="overlay draw-overlay">
-            <div class="draw-modal" (click)="$event.stopPropagation()">
-              @if (drawSpinning()) {
-                <div class="draw-spinner">
-                  <div class="spinner-emoji">🎰</div>
-                  <h2>Sorteando…</h2>
-                  <div class="spinner-bar"><div class="spinner-fill"></div></div>
-                  <p>La suerte está echada</p>
-                </div>
-              } @else if (drawResult()) {
-                <div class="draw-winner">
-                  <div class="dw-celebration">🎉🏆🎉</div>
-                  <div class="dw-label">¡TENEMOS GANADOR!</div>
-                  <div class="dw-name">{{ drawResult().participant?.name || 'Ganador' }}</div>
-                  <div class="dw-folio">Folio {{ drawResult().folio }}</div>
-                  <div class="dw-amount">Boleto de \${{ drawResult().amount }}</div>
-                  <button class="btn-save" (click)="drawOpen.set(false)">Cerrar</button>
-                </div>
-              }
-            </div>
-          </div>
-        }
+        <!-- Escenario full-screen del sorteo (para transmitir) -->
+        <app-draw-stage
+          [open]="drawOpen()"
+          [title]="r.title"
+          [prize]="r.prize"
+          [prizeValue]="r.prize_value"
+          [totalPaid]="stats()?.paid || 0"
+          [names]="paidNames()"
+          [result]="drawResult()"
+          (closed)="onStageClosed()"
+        />
 
         <!-- Modal editar sorteo PREMIUM -->
         @if (editOpen()) {
@@ -958,8 +946,17 @@ export class RaffleDetailComponent implements OnInit {
   modalError = signal('');
   exporting = signal(false);
   drawOpen = signal(false);
-  drawResult = signal<any>(null);
-  drawSpinning = signal(false);
+  drawResult = signal<DrawWinner | null>(null);
+  readonly paidNames = computed(() =>
+    this.tickets()
+      .filter((t) => t.status === 'paid' && t.participant?.name)
+      .map((t) => t.participant!.name!),
+  );
+
+  onStageClosed() {
+    this.drawOpen.set(false);
+    this.reload();
+  }
 
   private raffleId = '';
   readonly isAdmin = computed(() => this.auth.user()?.role === 'admin');
@@ -1248,42 +1245,35 @@ export class RaffleDetailComponent implements OnInit {
     if (!ok) return;
     this.drawOpen.set(true);
     this.drawResult.set(null);
-    this.drawSpinning.set(true);
-
-    setTimeout(() => {
-      this.api.draw(this.raffleId).subscribe({
-        next: (res) => {
-          this.drawSpinning.set(false);
-          this.drawResult.set(res.winner);
-          this.lanzarConfettiSorteo();
-          this.toast.success('🏆 ¡Tenemos ganador!', `Folio ${res.winner.folio} — ${res.winner.participant?.name || 'Ganador'}`);
-          this.reload();
-        },
-        error: (err) => {
-          // La respuesta pudo perderse (red, servidor dormido) aunque el sorteo SÍ se hizo:
-          // consultar el estado real antes de decir que falló.
-          this.api.getRaffle(this.raffleId).subscribe({
-            next: (r) => {
-              this.drawSpinning.set(false);
-              this.raffle.set(r);
-              if (r.status === 'drawn' && r.winner) {
-                this.drawResult.set(r.winner);
-                this.toast.success('🏆 ¡Tenemos ganador!', `Folio ${r.winner.folio}`);
-                this.reload();
-              } else {
-                this.drawOpen.set(false);
-                this.toast.error('Error al sortear', err?.error?.detail || 'Intenta de nuevo');
-              }
-            },
-            error: () => {
-              this.drawSpinning.set(false);
+    // La API se llama de inmediato: el escenario aporta la tensión (tambor + ruleta).
+    this.api.draw(this.raffleId).subscribe({
+      next: (res) => {
+        this.drawResult.set(res.winner);
+        this.toast.success('🏆 ¡Tenemos ganador!', `Folio ${res.winner.folio} — ${res.winner.participant?.name || 'Ganador'}`);
+        this.reload();
+      },
+      error: (err) => {
+        // La respuesta pudo perderse (red, servidor dormido) aunque el sorteo SÍ se hizo:
+        // consultar el estado real antes de decir que falló.
+        this.api.getRaffle(this.raffleId).subscribe({
+          next: (r) => {
+            this.raffle.set(r);
+            if (r.status === 'drawn' && r.winner) {
+              this.drawResult.set(r.winner as DrawWinner);
+              this.toast.success('🏆 ¡Tenemos ganador!', `Folio ${r.winner.folio}`);
+              this.reload();
+            } else {
               this.drawOpen.set(false);
-              this.toast.error('Error al sortear', 'Revisa tu conexión y recarga la página para ver el resultado');
-            },
-          });
-        },
-      });
-    }, 3000);
+              this.toast.error('Error al sortear', err?.error?.detail || 'Intenta de nuevo');
+            }
+          },
+          error: () => {
+            this.drawOpen.set(false);
+            this.toast.error('Error al sortear', 'Revisa tu conexión y recarga la página para ver el resultado');
+          },
+        });
+      },
+    });
   }
 
   lanzarConfettiSorteo() {
