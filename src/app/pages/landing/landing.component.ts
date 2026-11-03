@@ -27,6 +27,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
 
       <div class="hero-content">
         @if (raffle(); as r) {
+          <div class="hero-copy">
           <div class="hero-badge">
             <span class="badge-dot"></span>
             @if (r.drawn) {
@@ -46,27 +47,33 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
             Un raspadito, un boleto, una oportunidad de ganar.
             <br>El precio lo descubres tú.
           </p>
+          </div>
 
-          <!-- PREMIUM CARD -->
+          <div class="hero-showcase">
+          <!-- PREMIUM PRIZE SHOWCASE -->
           <div class="prize-card">
             <div class="pc-glow"></div>
             <div class="pc-inner">
-              @if ($any(r).image_url) {
-                <div class="pc-image-wrap">
-                  <img class="pc-image" [src]="$any(r).image_url" [alt]="r.prize" />
+              <div class="pc-media">
+                <div class="pc-ring"></div>
+                <div class="pc-frame">
+                  @if (r.image_url) {
+                    <img class="pc-image" [src]="r.image_url" [alt]="r.prize" />
+                  } @else {
+                    <div class="pc-icon">🎁</div>
+                  }
                   <div class="pc-image-shine"></div>
                 </div>
-              } @else {
-                <div class="pc-icon">🎁</div>
-              }
-              <div class="pc-info">
-                <div class="pc-label">PREMIO</div>
-                <div class="pc-name">{{ r.prize }}</div>
-                <div class="pc-value">Valor: \${{ r.prize_value }} MXN</div>
+                <div class="pc-chip">
+                  <span class="pc-chip-label">VALOR</span>
+                  <span class="pc-chip-value">\${{ r.prize_value }} MXN</span>
+                </div>
               </div>
             </div>
           </div>
+          </div>
 
+          <div class="hero-actions">
           <!-- STATS -->
           <div class="hero-stats">
             <div class="hs">
@@ -152,6 +159,7 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
             </button>
             <p class="cta-note">Solo {{ raffle()?.ticket_count }} boletos · Precio al raspar · Todos ganan oportunidad</p>
           }
+          </div>
         } @else {
           <div class="loading-hero">
             <div class="spinner-big"></div>
@@ -426,6 +434,12 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       padding: 8px 20px 28px;
       text-align: center;
     }
+    /* En móvil las columnas son transparentes: el hero sigue siendo una pila */
+    .hero-copy,
+    .hero-showcase,
+    .hero-actions {
+      display: contents;
+    }
 
     .hero-badge {
       display: inline-flex;
@@ -501,80 +515,116 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       max-width: 500px;
     }
 
-    /* PRIZE CARD */
+    /* PRIZE SHOWCASE */
     .prize-card {
       position: relative;
       width: 100%;
-      max-width: 440px;
+      max-width: 560px;
       margin-bottom: 18px;
     }
     .pc-glow {
       position: absolute;
-      inset: -2px;
-      border-radius: 24px;
-      background: linear-gradient(135deg, rgba(201,162,39,0.5), rgba(76,175,80,0.3), rgba(201,162,39,0.5));
+      inset: -3px;
+      border-radius: 26px;
+      background: linear-gradient(135deg, rgba(201,162,39,0.6), rgba(76,175,80,0.35), rgba(201,162,39,0.6));
+      background-size: 200% 200%;
       opacity: 0.6;
-      animation: glowPulse 3s ease-in-out infinite;
+      animation: glowPulse 3s ease-in-out infinite, shimmer 4s ease-in-out infinite;
+    }
+    .pc-glow::after {
+      content: '';
+      position: absolute;
+      inset: -10px;
+      border-radius: 34px;
+      background: inherit;
+      filter: blur(24px);
+      opacity: 0.5;
     }
     @keyframes glowPulse {
-      0%, 100% { opacity: 0.4; }
-      50% { opacity: 0.8; }
+      0%, 100% { opacity: 0.45; }
+      50% { opacity: 0.85; }
     }
     .pc-inner {
       position: relative;
       background: rgba(255,255,255,0.04);
       backdrop-filter: blur(20px);
       border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 22px;
-      padding: 14px;
+      border-radius: 23px;
+      padding: 12px;
+    }
+    .pc-media {
+      position: relative;
+      width: 100%;
+      height: clamp(190px, 30vh, 320px);
+      animation: prizeFloat 7s ease-in-out infinite;
+    }
+    @keyframes prizeFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .pc-ring {
+      position: absolute;
+      inset: -2px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(201,162,39,0.9), rgba(240,201,78,0.5), rgba(76,175,80,0.7), rgba(201,162,39,0.9));
+      background-size: 250% 250%;
+      animation: shimmer 3.5s ease-in-out infinite;
+    }
+    .pc-frame {
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      overflow: hidden;
       display: flex;
       align-items: center;
-      gap: 14px;
-    }
-    .pc-image-wrap {
-      position: relative;
-      width: 76px;
-      height: 76px;
-      border-radius: 16px;
-      overflow: hidden;
-      flex-shrink: 0;
+      justify-content: center;
+      background: radial-gradient(circle at 50% 35%, rgba(201,162,39,0.18), rgba(10,22,40,0.92) 72%);
+      box-shadow: 0 22px 50px rgba(0,0,0,0.45), 0 0 44px rgba(201,162,39,0.18);
     }
     .pc-image {
       width: 100%; height: 100%;
       object-fit: cover;
+      object-position: center;
     }
     .pc-image-shine {
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%);
-      animation: shine 3s ease-in-out infinite;
+      background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 50%, transparent 60%);
+      animation: shine 3.4s ease-in-out infinite;
+      pointer-events: none;
     }
     @keyframes shine {
       0% { transform: translateX(-100%); }
       100% { transform: translateX(100%); }
     }
     .pc-icon {
-      font-size: 44px;
-      flex-shrink: 0;
+      font-size: clamp(56px, 12vw, 92px);
     }
-    .pc-info { text-align: left; }
-    .pc-label {
+    .pc-chip {
+      position: absolute;
+      left: 14px;
+      bottom: 14px;
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: rgba(10,22,40,0.72);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(201,162,39,0.35);
+      box-shadow: 0 10px 26px rgba(0,0,0,0.35);
+      z-index: 2;
+    }
+    .pc-chip-label {
       font-size: 10px;
-      letter-spacing: 3px;
-      color: rgba(201,162,39,0.8);
+      letter-spacing: 2.5px;
       font-weight: 800;
-      margin-bottom: 2px;
+      color: rgba(201,162,39,0.85);
     }
-    .pc-name {
+    .pc-chip-value {
       font-size: 15px;
-      font-weight: 800;
+      font-weight: 900;
       color: #fff;
-      margin-bottom: 2px;
-      line-height: 1.3;
-    }
-    .pc-value {
-      font-size: 12px;
-      color: rgba(255,255,255,0.6);
     }
 
     /* STATS */
@@ -1438,6 +1488,39 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       50% { box-shadow: 0 0 30px rgba(201,162,39,0.3); }
     }
 
+    /* ===== HERO A DOS COLUMNAS (pantallas anchas) ===== */
+    @media (min-width: 1000px) {
+      .hero-content {
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+        grid-template-areas:
+          "copy showcase"
+          "actions showcase";
+        column-gap: 48px;
+        row-gap: 12px;
+        align-content: center;
+        align-items: center;
+        text-align: left;
+        width: 100%;
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 8px 40px 28px;
+      }
+      .hero-copy { display: block; grid-area: copy; }
+      .hero-showcase { display: block; grid-area: showcase; }
+      .hero-actions { display: block; grid-area: actions; }
+
+      .hero-stats { justify-content: flex-start; gap: 26px; }
+      .cd-grid { justify-content: flex-start; }
+      .cd-meet-solo { margin: 0 0 20px; }
+      .cta-note { max-width: 430px; }
+
+      .prize-card { max-width: 540px; margin-bottom: 0; }
+      .pc-media { height: clamp(300px, 46vh, 430px); }
+      .pc-chip { left: 18px; bottom: 18px; padding: 10px 20px; }
+      .pc-chip-value { font-size: 17px; }
+    }
+
     /* RESPONSIVE */
     @media (max-width: 768px) {
       .nav { padding: 10px 16px; }
@@ -1447,9 +1530,13 @@ import { Hero3DComponent } from '../../core/hero-3d.component';
       .hero-prize-name { font-size: clamp(17px, 5vw, 24px); margin-bottom: 6px; }
       .hero-sub { margin-bottom: 10px; font-size: 12.5px; }
       .prize-card { margin-bottom: 10px; }
-      .pc-inner { padding: 10px; gap: 10px; }
-      .pc-image-wrap { width: 56px; height: 56px; }
-      .pc-name { font-size: 12.5px; }
+      .pc-inner { padding: 8px; }
+      .pc-media { height: clamp(165px, 28vh, 235px); }
+      .pc-frame { border-radius: 15px; }
+      .pc-ring { border-radius: 17px; }
+      .pc-chip { left: 10px; bottom: 10px; padding: 6px 12px; gap: 6px; }
+      .pc-chip-label { font-size: 9px; letter-spacing: 2px; }
+      .pc-chip-value { font-size: 13px; }
       .hero-stats { gap: 12px; margin-bottom: 10px; }
       .hs-icon { font-size: 15px; }
       .hs-n { font-size: 17px; }

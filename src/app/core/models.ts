@@ -74,6 +74,7 @@ export interface PublicRaffle {
   ticket_count: number;
   status: string;
   draw_date?: string | null;
+  image_url?: string | null;
   paid_count: number;
   drawn: boolean;
   winner_folio?: number | null;
