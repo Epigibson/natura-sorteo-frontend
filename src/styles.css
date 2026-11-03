@@ -1,4 +1,23 @@
 /* Sorteo Natura — estilos globales */
+:root {
+  --bg: #f2f5f2;
+  --surface: #ffffff;
+  --ink: #14231b;
+  --ink-soft: #2f4038;
+  --muted: #5b6b62;
+  --line: #e2e8e4;
+  --line-soft: #edf1ee;
+  --brand-50: #eef6ef;
+  --brand-100: #e0eee2;
+  --brand-200: #c2ddc7;
+  --brand-500: #2e7d32;
+  --brand-700: #1b5e20;
+  --brand-800: #164c1c;
+  --brand-900: #0d3b26;
+  --gold-soft: #fbf3df;
+  --gold-ink: #8a6712;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -16,8 +35,11 @@ body {
     'Helvetica Neue',
     Arial,
     sans-serif;
-  background: #f3f4f6;
-  color: #1f2937;
+  background:
+    radial-gradient(1100px 380px at 50% -10%, rgba(27, 94, 32, 0.08), transparent 62%),
+    var(--bg);
+  background-attachment: fixed;
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -28,7 +50,7 @@ textarea {
 }
 
 a {
-  color: #1b5e20;
+  color: var(--brand-700);
 }
 
 /* Confetti del escenario de sorteo (elementos anexados a <body>) */

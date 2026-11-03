@@ -17,7 +17,6 @@ import { ModalsComponent } from './core/modals.component';
       :host {
         display: block;
         min-height: 100vh;
-        background: #f3f4f6;
       }
     `,
   ],
