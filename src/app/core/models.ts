@@ -92,3 +92,8 @@ export interface AccessCheck {
   amount?: number | null;
   message: string;
 }
+
+export interface AppSettings {
+  auto_release_enabled: boolean;
+  auto_release_hours: number;
+}

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   AccessCheck,
+  AppSettings,
   PublicRaffle,
   Raffle,
   RaffleStats,
@@ -139,6 +140,15 @@ export class ApiService {
       current_password: current,
       new_password: next,
     });
+  }
+
+  // ---------- Ajustes globales ----------
+  getSettings(): Observable<AppSettings> {
+    return this.http.get<AppSettings>(`${API}/settings`);
+  }
+
+  updateSettings(body: AppSettings): Observable<AppSettings> {
+    return this.http.put<AppSettings>(`${API}/settings`, body);
   }
 
   // ---------- Público ----------

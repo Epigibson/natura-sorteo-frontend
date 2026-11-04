@@ -32,6 +32,12 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'configuracion',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/settings/settings.component').then((m) => m.SettingsComponent),
+  },
+  {
     path: 'sorteos/:id',
     canActivate: [authGuard],
     loadComponent: () =>
