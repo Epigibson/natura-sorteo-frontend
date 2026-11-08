@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, timeout } from 'rxjs';
 import {
   AccessCheck,
   AppSettings,
@@ -95,6 +95,18 @@ export class ApiService {
       winner: { folio: number; amount: number; participant?: { name?: string } };
       total_paid: number;
     }>(`${API}/raffles/${id}/draw`, {});
+  }
+
+  sendMassRemind(
+    raffleId: string,
+    baseUrl: string,
+  ): Observable<{ sent: number; failed: number; skipped_no_phone: number; recipients: number }> {
+    return this.http
+      .post<{ sent: number; failed: number; skipped_no_phone: number; recipients: number }>(
+        `${API}/raffles/${raffleId}/remind`,
+        { base_url: baseUrl },
+      )
+      .pipe(timeout(180000));
   }
 
   exportParticipants(raffleId: string): Observable<Blob> {

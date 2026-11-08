@@ -53,6 +53,11 @@ import { Raffle, RaffleStats, Ticket } from '../../core/models';
             @if (isAdmin() && r.status === 'closed') {
               <button class="btn-ghost" (click)="reopenRaffle()">Reabrir venta</button>
             }
+            @if (isAdmin() && canRemind()) {
+              <button class="btn-ghost" (click)="remindAll()" [disabled]="reminding()">
+                {{ reminding() ? 'Enviando…' : '📲 Recordatorio' }}
+              </button>
+            }
             @if (isAdmin() && r.status !== 'drawn') {
               <button class="btn-primary" (click)="draw()" [disabled]="(stats()?.paid || 0) === 0">
                 🎲 Sortear premio
@@ -947,6 +952,7 @@ export class RaffleDetailComponent implements OnInit {
   exporting = signal(false);
   drawOpen = signal(false);
   drawResult = signal<DrawWinner | null>(null);
+  reminding = signal(false);
   readonly paidNames = computed(() =>
     this.tickets()
       .filter((t) => t.status === 'paid' && t.participant?.name)
@@ -960,6 +966,16 @@ export class RaffleDetailComponent implements OnInit {
 
   private raffleId = '';
   readonly isAdmin = computed(() => this.auth.user()?.role === 'admin');
+  readonly canRemind = computed(() => {
+    const st = this.raffle()?.status;
+    // Sin !reminding(): el botón debe seguir visible para mostrar "Enviando…".
+    return (
+      this.isAdmin() &&
+      !!st &&
+      ['open', 'closed', 'drawing'].includes(st) &&
+      (this.stats()?.participants ?? 0) > 0
+    );
+  });
   /** Folios con una acción en curso: evita dobles clics en Cobrar/Liberar/Deshacer. */
   readonly busyFolios = signal<Set<number>>(new Set());
 
@@ -1223,6 +1239,39 @@ export class RaffleDetailComponent implements OnInit {
       },
       error: (err) =>
         this.toast.error('Error al cerrar', err?.error?.detail || 'Intenta de nuevo'),
+    });
+  }
+
+  async remindAll() {
+    const n = this.stats()?.participants ?? 0;
+    const r = this.raffle();
+    const ok = await this.modal.confirm({
+      title: '📲 Recordatorio por WhatsApp',
+      message:
+        `Se avisará a ${n} persona(s) por WhatsApp que el sorteo "${r?.title}" se va a realizar.\n\n` +
+        `Mensaje:\nHola, recordatorio 🎲\nEl sorteo "${r?.title}" (${r?.prize}) se realiza el ${r?.draw_date || 'por definir'}.\nTablero: ${this.boardUrl()}\n\n` +
+        'Máximo un envío cada 24 horas.',
+      confirmLabel: 'Enviar recordatorio',
+      cancelLabel: 'Cancelar',
+      variant: 'primary',
+    });
+    if (!ok) return;
+    this.reminding.set(true);
+    this.api.sendMassRemind(this.raffleId, location.origin).subscribe({
+      next: (res) => {
+        this.reminding.set(false);
+        this.toast.success(
+          'Recordatorio enviado',
+          `${res.sent} enviados${res.failed ? `, ${res.failed} fallaron` : ''}`,
+        );
+      },
+      error: (err) => {
+        this.reminding.set(false);
+        this.toast.error(
+          'No se pudo enviar',
+          typeof err?.error?.detail === 'string' ? err.error.detail : 'Verifica que WhatsApp (Evolution) esté encendido',
+        );
+      },
     });
   }
 
